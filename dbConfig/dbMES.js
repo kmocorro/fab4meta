@@ -9,7 +9,6 @@ function authMES(){   // getting details from local db
                 sql: 'SELECT * FROM tbl_mes_details;'
             },  function(err, results, fields){
                 let auth_mes_obj = [];
-
                     for(let i=0; i<results.length;i++){
                         if(results[i].db == 'fab4'){ // DB only for fab4
                             auth_mes_obj.push({
