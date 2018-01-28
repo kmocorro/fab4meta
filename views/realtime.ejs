@@ -374,8 +374,8 @@
         socket.emit('date', {dtime: new Date()});
         socket.emit('process_name', {process_name: '<%= process %>'});
 
-        socket.on('emitDate', function(dbdate){
-            console.log(dbdate);
+        socket.on('emitDate', function(dtime){
+            console.log(dtime);
             socket.emit('date', {dtime: new Date()});
         });
         
