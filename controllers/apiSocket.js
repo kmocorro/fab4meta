@@ -5,6 +5,7 @@ let mysqlCloud = require('../dbConfig/dbCloud');
 let mysqlMES = require('../dbConfig/dbMES');
 let moment = require('moment');
 
+let regression = require('regression');
 
 module.exports = function(io){
 
@@ -89,12 +90,63 @@ module.exports = function(io){
 
                         hourlyOuts().then(function(results){
                             function cleaning4Linearity(){ // cleaning result object
-                                if(typeof results != 'undefined' || results != null){
+                                return new Promise(function(resolve, reject){
+                                    if(typeof results != 'undefined' || results != null){
 
-                                }
+                                        let forLinear = [];
+                                        let forLinear_data = [];
+                                        let xArr = [];
+                                        let yArr = [];
+                                        let trace = [];
+    
+                                        for(let i=0; i<results.length; i++){
+                                            forLinear.push({
+                                                process_id: results[i].process_id,
+                                                x: results[i].fab_hour,
+                                                y: results[i].out_qty
+                                            });
+                                        }
+    
+                                        for(let i=0; i<forLinear.length; i++){
+                                            forLinear_data.push(
+                                                [forLinear[i].x, forLinear[i].y]
+                                            )
+                                        }
+                                        
+                                        let ggLinear = regression.linear(forLinear_data, {order : 1}); 
+                                        console.log(ggLinear);
+                                        
+                                        for(let i=0; i<ggLinear.points.length; i++){
+
+                                            xArr.push(
+                                                ggLinear.points[i][0]
+                                            );
+
+                                            yArr.push(
+                                                ggLinear.points[i][1]
+                                            );
+                                        }
+
+                                        trace.push({
+                                            x: xArr,
+                                            y: yArr,
+                                            type: 'scatter',
+                                            mode: 'lines'
+                                        })
+                                        
+                                        console.log(trace);
+
+                                        resolve(trace);
+                                    }
+
+                                });
+                                
                             }
 
-                            cleaning4Linearity();
+                            cleaning4Linearity().then(function(trace){
+                                socket.emit('dateAndprocess', trace);
+                            });
+
                         });
                     });
                 });

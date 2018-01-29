@@ -16,6 +16,7 @@
     "express": "^4.16.2",
     "moment": "^2.20.1",
     "mysql": "^2.15.0",
+    "regression": "^2.0.1",
     "socket.io": "^2.0.4"
   }
 }
