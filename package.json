@@ -14,6 +14,7 @@
     "cookie-parser": "^1.4.3",
     "ejs": "^2.5.7",
     "express": "^4.16.2",
+    "moment": "^2.20.1",
     "mysql": "^2.15.0",
     "socket.io": "^2.0.4"
   }

@@ -371,12 +371,17 @@
 <script> // date time on socket
     $(function(){
         var socket = io();
-        socket.emit('date', {dtime: new Date()});
-        socket.emit('process_name', {process_name: '<%= process %>'});
+        let dateAndprocess_obj = [];
+            dateAndprocess_obj.push({
+                dtime: new Date(), 
+                process_name: '<%= process %>'
+            });
+            
+        socket.emit('dateAndprocess', dateAndprocess_obj );
 
-        socket.on('emitDate', function(dtime){
-            console.log(dtime);
-            socket.emit('date', {dtime: new Date()});
+        socket.on('dateAndprocess', function(dateAndprocess_obj_from_server){
+            console.log(dateAndprocess_obj_from_server);
+            socket.emit('dateAndprocess', dateAndprocess_obj );
         });
         
     });

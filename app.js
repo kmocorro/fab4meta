@@ -14,5 +14,4 @@ app.set('view engine', 'ejs');
 apiController(app);
 apiSocket(io);
 
-
 server.listen(port);
