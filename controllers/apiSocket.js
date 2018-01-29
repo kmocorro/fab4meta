@@ -98,6 +98,10 @@ module.exports = function(io){
                                         let xArr = [];
                                         let yArr = [];
                                         let trace = [];
+
+                                        let xArr_outs = [];
+                                        let yArr_outs = [];
+                                        let trace_outs = [];
     
                                         for(let i=0; i<results.length; i++){
                                             forLinear.push({
@@ -105,6 +109,16 @@ module.exports = function(io){
                                                 x: results[i].fab_hour,
                                                 y: results[i].out_qty
                                             });
+                                        }
+
+                                        for(let i=0; i<results.length; i++){
+                                            xArr_outs.push(
+                                                results[i].fab_hour
+                                            );
+
+                                            yArr_outs.push(
+                                                results[i].out_qty
+                                            )
                                         }
     
                                         for(let i=0; i<forLinear.length; i++){
@@ -127,24 +141,32 @@ module.exports = function(io){
                                             );
                                         }
 
+                                        
                                         trace.push({
                                             x: xArr,
                                             y: yArr,
                                             type: 'scatter',
                                             mode: 'lines'
-                                        })
-                                        
-                                        console.log(trace);
+                                        });
 
-                                        resolve(trace);
+                                        trace_outs.push({
+                                            x: xArr_outs,
+                                            y: yArr_outs,
+                                            type: 'scatter'
+                                        });
+
+                                        let linear_traces = [trace[0], trace_outs[0]];
+
+                                        console.log(linear_traces);
+                                        resolve(linear_traces);
                                     }
 
                                 });
                                 
                             }
 
-                            cleaning4Linearity().then(function(trace){
-                                socket.emit('dateAndprocess', trace);
+                            cleaning4Linearity().then(function(linear_traces){
+                                socket.emit('dateAndprocess', linear_traces);
                             });
 
                         });

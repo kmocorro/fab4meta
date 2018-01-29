@@ -399,8 +399,8 @@
 
         socket.emit('dateAndprocess', dateAndprocess_obj );
 
-        socket.on('dateAndprocess', function(trace){
-            console.log(trace);
+        socket.on('dateAndprocess', function(linear_traces){
+            console.log(linear_traces);
 
             (function() {
                 var d3 = Plotly.d3;
@@ -422,8 +422,8 @@
                     title:'<%= process %> linearity'
                 };
 
-                var data = trace;
-                
+                var data = linear_traces;
+
                 Plotly.plot(gd, data, layout, {displayModeBar: false});
 
                 window.onresize = function() {
