@@ -27,7 +27,7 @@ function authLocal(){   // getting details from local db
 authLocal().then(function(auth_local_obj){
     let poolLocal = mysql.createPool({
         multipleStatements: 1000,
-        connectionLimit: 1000,
+        connectionLimit: 10000,
         host: auth_local_obj[0].auth_host,
         user:   auth_local_obj[0].auth_user,
         password:   auth_local_obj[0].auth_password,

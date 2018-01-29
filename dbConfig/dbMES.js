@@ -30,7 +30,7 @@ function authMES(){   // getting details from local db
 authMES().then(function(auth_mes_obj){
     let poolMES = mysql.createPool({
         multipleStatements: 1000,
-        connectionLimit: 1000,
+        connectionLimit: 10000,
         host: auth_mes_obj[0].auth_host,
         user:   auth_mes_obj[0].auth_user,
         password:   auth_mes_obj[0].auth_password,

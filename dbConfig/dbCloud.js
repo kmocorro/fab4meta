@@ -27,7 +27,7 @@ function authCloud(){
 authCloud().then(function(auth_cloud_obj){
     let poolCloud = mysql.createPool({
         multipleStatements: 1000,
-        connectionLimit: 1000,
+        connectionLimit: 10000,
         host: auth_cloud_obj[0].auth_host,
         user:   auth_cloud_obj[0].auth_user,
         password:   auth_cloud_obj[0].auth_password,
