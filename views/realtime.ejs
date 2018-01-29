@@ -161,10 +161,10 @@
                 <div class="nav-tabs-custom">
                     <!-- Tabs within a box -->
                     <ul class="nav nav-tabs pull-right">
-                        <li class="pull-left header"><i class="fa fa-line-chart"></i> Linearity</li>
+                        <li class="pull-left header"><i class="fa fa-line-chart"></i> Linear Regression</li>
                     </ul>
                     <div class="tab-content no-padding">
-                        <div class="chart tab-pane active" id="linearity-chart" style=" height: 350px;"></div>
+                        <div class="chart tab-pane active" id="linearity-chart" style=" height: 300px;"></div>
                     </div>
                 </div>
             </section>
@@ -402,6 +402,18 @@
         socket.on('dateAndprocess', function(linear_traces){
             console.log(linear_traces);
 
+            var dataLinear = linear_traces;
+            var layout = {
+                    title: ('<%= process %>').toUpperCase() + ' linearity'
+                };
+
+            Plotly.newPlot('linearity-chart', dataLinear, layout, {displayModeBar: false});
+            Plotly.update('linearity-chart', dataLinear, layout );
+            
+            socket.emit('dateAndprocess', dateAndprocess_obj );
+
+
+            /*
             (function() {
                 var d3 = Plotly.d3;
 
@@ -419,19 +431,23 @@
                 var gd = gd3.node();
 
                 var layout = {
-                    title:'<%= process %> linearity'
+                    title: ('<%= process %>').toUpperCase() + ' linearity'
                 };
 
-                var data = linear_traces;
+                var dataLinear = linear_traces;
 
-                Plotly.plot(gd, data, layout, {displayModeBar: false});
+                Plotly.newPlot(gd, dataLinear, layout, {displayModeBar: false});
+                Plotly.update(gd, dataLinear, layout );
 
                 window.onresize = function() {
                     Plotly.Plots.resize(gd);
                 };
 
+                socket.emit('dateAndprocess', dateAndprocess_obj );
+
             })();
-            socket.emit('dateAndprocess', dateAndprocess_obj );
+           */
+
         });
         
     });
