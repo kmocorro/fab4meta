@@ -161,7 +161,7 @@
                 <div class="nav-tabs-custom">
                     <!-- Tabs within a box -->
                     <ul class="nav nav-tabs pull-right">
-                        <li class="pull-left header"><i class="fa fa-line-chart"></i> Linear Regression</li>
+                        <li class="pull-left header"><i class="fa fa-line-chart"></i> Linearity</li>
                     </ul>
                     <div class="tab-content no-padding">
                         <div class="chart tab-pane active" id="linearity-chart" style=" height: 300px;"></div>
@@ -449,7 +449,7 @@
             /** Linearity Chart */
             var dataLinear = linear_traces;
             var layout = {
-                    title: ('<%= process %>').toUpperCase() + ' linearity'
+                    title: ('<%= process %>').toUpperCase() + ' Linearity'
                 };
 
             Plotly.newPlot('linearity-chart', dataLinear, layout, {displayModeBar: false});
@@ -466,7 +466,7 @@
             /** YieldperTool Chart */
             var dataYield = yield_objects;
             var layout = {
-                    title: ('<%= process %>').toUpperCase() + ' % Yield loss',
+                    title: ('<%= process %>').toUpperCase() + ' | % Yield loss',
                     margin: {
                     l: 170,
                     r: 30,
@@ -489,7 +489,7 @@
             /** scrap DPPM  chart */
             var dataScrap = scrap_objects;
             var layout = {
-                title: ('<%= process %>').toUpperCase() + ' Scrap DPPM',
+                title: ('<%= process %>').toUpperCase() + ' | Top 5 Scrap (DPPM)',
                     margin: {
                     l: 170,
                     r: 30,
@@ -509,7 +509,7 @@
             console.log(oee_objects);
 
             /** oee chart */
-            
+
             /** -- oee chart -- */
 
         });

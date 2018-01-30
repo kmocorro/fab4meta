@@ -172,7 +172,10 @@ module.exports = function(io){
                                             x: xArr_outs,
                                             y: yArr_outs,
                                             type: 'scatter',
-                                            name: 'Outs'
+                                            name: 'Outs',
+                                            line: {
+                                                width: '1.5'
+                                            }
 
                                         });
 
@@ -425,7 +428,7 @@ module.exports = function(io){
                                 if(AMorPM == 'AM'){
                                     
                                     connection.query({
-                                        sql: 'SELECT scrap_code, SUM(scrap_qty) AS scrap_qty FROM MES_SCRAP_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY scrap_code ORDER BY SUM(scrap_qty) DESC LIMIT 10',
+                                        sql: 'SELECT scrap_code, SUM(scrap_qty) AS scrap_qty FROM MES_SCRAP_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY scrap_code ORDER BY SUM(scrap_qty) DESC LIMIT 5',
                                         values: [datetime, process]
                 
                                     },  function(err, results, fields){
@@ -437,7 +440,7 @@ module.exports = function(io){
                                 } else if(AMorPM == 'PREPM'){
 
                                     connection.query({
-                                        sql: 'SELECT scrap_code, SUM(scrap_qty) AS scrap_qty FROM MES_SCRAP_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY scrap_code ORDER BY SUM(scrap_qty) DESC LIMIT 10',
+                                        sql: 'SELECT scrap_code, SUM(scrap_qty) AS scrap_qty FROM MES_SCRAP_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY scrap_code ORDER BY SUM(scrap_qty) DESC LIMIT 5',
                                         values: [datetime, process, datetime, process]
                 
                                     },  function(err, results, fields){
@@ -449,7 +452,7 @@ module.exports = function(io){
                                 } else if(AMorPM == 'POSTPM'){
 
                                     connection.query({
-                                        sql: 'SELECT scrap_code, SUM(scrap_qty) AS scrap_qty FROM MES_SCRAP_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY)) AND process_id = ? GROUP BY scrap_code ORDER BY SUM(scrap_qty) DESC LIMIT 10',
+                                        sql: 'SELECT scrap_code, SUM(scrap_qty) AS scrap_qty FROM MES_SCRAP_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY)) AND process_id = ? GROUP BY scrap_code ORDER BY SUM(scrap_qty) DESC LIMIT 5',
                                         values: [datetime, process, datetime, process]
                 
                                     },  function(err, results, fields){
@@ -571,7 +574,10 @@ module.exports = function(io){
                                                 x: xBarDPPM,
                                                 y: yBarDPPM,
                                                 type: "bar",
-                                                orientation: "h"
+                                                orientation: "h",
+                                                marker: {
+                                                    color: 'rgba(255, 178, 102, 1)'
+                                                }
                                             });
 
                                             scrap_objects = bar_scrap_trace;
@@ -694,7 +700,7 @@ module.exports = function(io){
                         }
 
                         out_qty_per_tool().then(function(outs_per_tool_results){
-                            
+
                         });
                         
                     });
