@@ -277,7 +277,7 @@ module.exports = function(io){
                                 } else if(AMorPM == 'POSTPM'){
 
                                     connection.query({
-                                        sql: 'SELECT A.eq_name AS eq_name, A.scrap_qty AS scrap_qty, B.out_qty AS out_qty FROM   (SELECT B.eq_name, SUM(A.scrap_qty) AS scrap_qty    FROM MES_SCRAP_DETAILS A      JOIN MES_EQ_INFO B  ON A.eq_id = B.eq_id     WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE))   AND A.process_id = ?     GROUP BY B.eq_name ) A JOIN   (SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL 1 DAY))   AND A.process_id = ?  GROUP BY B.eq_name ) B ON A.eq_name = B.eq_name',
+                                        sql: 'SELECT A.eq_name AS eq_name, A.scrap_qty AS scrap_qty, B.out_qty AS out_qty FROM   (SELECT B.eq_name, SUM(A.scrap_qty) AS scrap_qty    FROM MES_SCRAP_DETAILS A      JOIN MES_EQ_INFO B  ON A.eq_id = B.eq_id     WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE))   AND A.process_id = ?     GROUP BY B.eq_name ) A JOIN   (SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY))   AND A.process_id = ?  GROUP BY B.eq_name ) B ON A.eq_name = B.eq_name',
                                         values: [datetime, process, datetime, process]
                 
                                     },  function(err, results, fields){
@@ -593,6 +593,110 @@ module.exports = function(io){
                             });
 
                         });
+                    });
+                });
+
+            });
+
+        });
+
+        socket.on('oee', function(dateAndprocess_obj){
+            function dateAndprocess_obj_isValid(){ // check if obj is valid
+                return new Promise(function(resolve, reject){
+
+                    if(!dateAndprocess_obj){
+                        socket.emit('dateAndprocess', 'dateAndprocess_obj is missing');
+                    } else {
+                        let dateAndprocess_obj_valid = dateAndprocess_obj;
+                        resolve(dateAndprocess_obj_valid);
+                    }
+
+                });
+            }
+
+            mysqlMES.poolMES.getConnection(function(err, connection){ // Scrap DPPM Pool
+
+                dateAndprocess_obj_isValid().then(function(dateAndprocess_obj_valid){
+                    function is_shift_AMorPM(){ //  check if AM or PM
+                        return new Promise(function(resolve, reject){
+                            let today_date = Date.parse(moment(dateAndprocess_obj_valid.dtime));
+                            let shift_AM_start = Date.parse(moment(dateAndprocess_obj_valid.dtime).format('YYYYY-MM-DD, 06:50:00')); // adjusting + 20mins to parallel in DB update
+                            let shift_AM_end = Date.parse(moment(dateAndprocess_obj_valid.dtime).format('YYYYY-MM-DD, 18:49:59')); // adjusting + 20mins to parallel in DB update
+    
+                            let shift_PM_start = Date.parse(moment(dateAndprocess_obj_valid.dtime).format('YYYYY-MM-DD, 18:50:00')); // adjusting + 20mins to parallel in DB update
+                            let shift_MID_pre = Date.parse(moment(dateAndprocess_obj_valid.dtime).format('YYYYY-MM-DD, 23:59:59'));
+                            let shift_MID_start = Date.parse(moment(dateAndprocess_obj_valid.dtime).format('YYYYY-MM-DD, 00:00:00'));
+                            let shift_PM_end = Date.parse(moment(dateAndprocess_obj_valid.dtime).format('YYYYY-MM-DD, 06:49:59')); // adjusting + 20mins to parallel in DB update
+    
+                            if(today_date >= shift_AM_start && today_date <= shift_AM_end){ // AM shift
+                                resolve('AM');
+                                console.log('AM');
+                            } else if(today_date >= shift_PM_start && today_date <= shift_MID_pre) { // PREPM shift
+                                resolve('PREPM');
+                                console.log('PREPM');
+                            } else if(today_date >= shift_MID_start && today_date <= shift_PM_end){
+                                resolve('POSTPM');
+                                console.log('POSTPM');
+                            }
+                        });
+                    }
+                    
+                    is_shift_AMorPM().then(function(AMorPM){
+                        function out_qty_per_tool(){ // function query for outs
+                            return new Promise(function(resolve, reject){ 
+
+                                let datetime = moment(dateAndprocess_obj[0].dtime).format('YYYY-MM-DD');
+                                let process = dateAndprocess_obj[0].process_name;
+
+                                connection.query({
+                                    sql: 'SET time_zone = "+08:00"'
+                                });
+
+                                if(AMorPM == 'AM'){
+                                    
+                                    connection.query({
+                                        sql: 'SELECT B.eq_name, SUM(C.out_qty) AS out_qty FROM		 (SELECT eq_id, proc_id  FROM MES_EQ_PROCESS   GROUP BY eq_id ) A     JOIN   MES_EQ_INFO B   ON A.eq_id = B.eq_id   JOIN   MES_OUT_DETAILS C     ON A.eq_id = C.eq_id   WHERE C.process_id = ? AND C.date_time >= CONCAT(?," 06:30:00") && C.date_time <= CONCAT(? + INTERVAL 0 DAY," 18:29:59")  GROUP BY B.eq_name',
+                                        values: [process, datetime, datetime]
+                
+                                    },  function(err, results, fields){
+                                        //console.log(results);
+                                       let outs_per_tool_results = results;
+                                        resolve(outs_per_tool_results);
+                                    });
+
+                                } else if(AMorPM == 'PREPM'){
+
+                                    connection.query({
+                                        sql: 'SELECT B.eq_name, SUM(C.out_qty) AS out_qty FROM		 (SELECT eq_id, proc_id  FROM MES_EQ_PROCESS   GROUP BY eq_id ) A     JOIN   MES_EQ_INFO B   ON A.eq_id = B.eq_id   JOIN   MES_OUT_DETAILS C     ON A.eq_id = C.eq_id   WHERE C.process_id = ? AND C.date_time >= CONCAT(?," 18:30:00") && C.date_time <= CONCAT(? + INTERVAL 0 DAY," 23:59:59")  GROUP BY B.eq_name',
+                                        values: [process, datetime, datetime]
+                
+                                    },  function(err, results, fields){
+                                        //console.log(results);
+                                       let outs_per_tool_results = results;
+                                        resolve(outs_per_tool_results);
+                                    });
+
+                                } else if(AMorPM == 'POSTPM'){
+
+                                    connection.query({
+                                        sql: 'SELECT B.eq_name, SUM(C.out_qty) AS out_qty FROM		 (SELECT eq_id, proc_id  FROM MES_EQ_PROCESS   GROUP BY eq_id ) A     JOIN   MES_EQ_INFO B   ON A.eq_id = B.eq_id   JOIN   MES_OUT_DETAILS C     ON A.eq_id = C.eq_id   WHERE C.process_id = ? AND C.date_time >= CONCAT(? + INTERVAL -1 DAY," 18:30:00") && C.date_time <= CONCAT(? + INTERVAL 0 DAY," 06:29:59")  GROUP BY B.eq_name',
+                                        values: [process, datetime, datetime]
+                
+                                    },  function(err, results, fields){
+                                        //console.log(results);
+                                       let outs_per_tool_results = results;
+                                        resolve(outs_per_tool_results);
+                                    });
+
+                                }
+
+                            });
+                        }
+
+                        out_qty_per_tool().then(function(outs_per_tool_results){
+                            
+                        });
+                        
                     });
                 });
 
