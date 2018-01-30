@@ -168,7 +168,46 @@
                     </div>
                 </div>
             </section>
+            <section class="col-lg-6">
+                <!-- Custom tabs (Charts with tabs)-->
+                <div class="nav-tabs-custom">
+                    <!-- Tabs within a box -->
+                    <ul class="nav nav-tabs pull-right">
+                        <li class="pull-left header"><i class="fa fa-bar-chart"></i> % Yield Loss</li>
+                    </ul>
+                    <div class="tab-content no-padding">
+                        <div class="chart tab-pane active" id="yield-chart" style=" height: 300px;"></div>
+                    </div>
+                </div>
+            </section>
         </div>
+        <!-- second main row -->
+        <div class="row">
+                <section class="col-lg-6">
+                    <!-- Custom tabs (Charts with tabs)-->
+                    <div class="nav-tabs-custom">
+                        <!-- Tabs within a box -->
+                        <ul class="nav nav-tabs pull-right">
+                            <li class="pull-left header"><i class="fa fa-line-chart"></i> OEE</li>
+                        </ul>
+                        <div class="tab-content no-padding">
+                            <div class="chart tab-pane active" id="oee-chart" style=" height: 300px;"></div>
+                        </div>
+                    </div>
+                </section>
+                <section class="col-lg-6">
+                    <!-- Custom tabs (Charts with tabs)-->
+                    <div class="nav-tabs-custom">
+                        <!-- Tabs within a box -->
+                        <ul class="nav nav-tabs pull-right">
+                            <li class="pull-left header"><i class="fa fa-bar-chart"></i> Scrap DPPM</li>
+                        </ul>
+                        <div class="tab-content no-padding">
+                            <div class="chart tab-pane active" id="scrap_chart" style=" height: 300px;"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
     </section>
 
     
@@ -396,12 +435,18 @@
                 dtime: new Date(), 
                 process_name: '<%= process %>'
             });
+        
+        /** socket emitters */
+        socket.emit('dateAndprocess', dateAndprocess_obj ); // emitter for Linearity
+        socket.emit('yieldPerTool', dateAndprocess_obj ); // emitter for yield
+        socket.emit('scrapDPPM', dateAndprocess_obj ); // emitter for scrap dppm
+        /** -- socket emitters -- */
 
-        socket.emit('dateAndprocess', dateAndprocess_obj );
-
-        socket.on('dateAndprocess', function(linear_traces){
+        /** socket listeners */
+        socket.on('dateAndprocess', function(linear_traces){ // linearity listener
             console.log(linear_traces);
 
+            /** Linearity Chart */
             var dataLinear = linear_traces;
             var layout = {
                     title: ('<%= process %>').toUpperCase() + ' linearity'
@@ -409,53 +454,59 @@
 
             Plotly.newPlot('linearity-chart', dataLinear, layout, {displayModeBar: false});
             Plotly.update('linearity-chart', dataLinear, layout );
-            
+            /** -- Linearity Chart -- */
+
             socket.emit('dateAndprocess', dateAndprocess_obj );
 
-
-            /*
-            (function() {
-                var d3 = Plotly.d3;
-
-                var WIDTH_IN_PERCENT_OF_PARENT = 100,
-                    HEIGHT_IN_PERCENT_OF_PARENT = 100;
-
-                var gd3 = d3.select('#linearity-chart')
-                    .append('div')
-                    .style({
-                        width: WIDTH_IN_PERCENT_OF_PARENT + '%',
-
-                        height: HEIGHT_IN_PERCENT_OF_PARENT + '%'
-                    });
-
-                var gd = gd3.node();
-
-                var layout = {
-                    title: ('<%= process %>').toUpperCase() + ' linearity'
-                };
-
-                var dataLinear = linear_traces;
-
-                Plotly.newPlot(gd, dataLinear, layout, {displayModeBar: false});
-                Plotly.update(gd, dataLinear, layout );
-
-                window.onresize = function() {
-                    Plotly.Plots.resize(gd);
-                };
-
-                socket.emit('dateAndprocess', dateAndprocess_obj );
-
-            })();
-           */
-
         });
+
+        socket.on('yieldPerTool', function(yield_objects){ // yield per tool listener
+            console.log(yield_objects);
+
+            /** YieldperTool Chart */
+            var dataYield = yield_objects;
+            var layout = {
+                    title: ('<%= process %>').toUpperCase() + ' % Yield loss',
+                    margin: {
+                    l: 170,
+                    r: 30,
+                    b: 50,
+                    t: 100,
+                    pad: 4
+                },
+            };
+
+            Plotly.newPlot('yield-chart', dataYield, layout, {displayModeBar: false});
+            Plotly.update('yield-chart', dataYield, layout );
+            /** -- YieldperTool Chart -- */
+
+            socket.emit('yieldPerTool', dateAndprocess_obj );
+        });
+
+        socket.on('scrapDPPM', function(scrap_objects){ // scrap dppm listener
+            console.log(scrap_objects);
+
+            /** scrap DPPM  chart */
+            var dataScrap = scrap_objects;
+            var layout = {
+                title: ('<%= process %>').toUpperCase() + ' Scrap DPPM',
+                    margin: {
+                    l: 170,
+                    r: 30,
+                    b: 50,
+                    t: 100,
+                    pad: 4
+                },
+            }
+            Plotly.newPlot('scrap_chart', dataScrap, layout, {displayModeBar: false});
+            Plotly.update('scrap_chart', dataScrap, layout );
+            /** -- scrap DPPM  chart -- */
+
+            socket.emit('scrapDPPM', dateAndprocess_obj );
+        });
+        /** -- socket listeners -- */
         
     });
 </script>
-
-<script>
-
-</script>
-
 </body>
 </html>
