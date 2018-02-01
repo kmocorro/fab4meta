@@ -440,6 +440,7 @@
         socket.emit('dateAndprocess', dateAndprocess_obj ); // emitter for Linearity
         socket.emit('yieldPerTool', dateAndprocess_obj ); // emitter for yield
         socket.emit('scrapDPPM', dateAndprocess_obj ); // emitter for scrap dppm
+        socket.emit('oee', dateAndprocess_obj ); // emitter for oee
         /** -- socket emitters -- */
 
         /** socket listeners */
@@ -511,7 +512,8 @@
             /** oee chart */
 
             /** -- oee chart -- */
-
+            
+            socket.emit('oee', dateAndprocess_obj ); // emitter for oee
         });
         /** -- socket listeners -- */
         

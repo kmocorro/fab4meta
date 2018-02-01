@@ -9,9 +9,10 @@ let regression = require('regression');
 
 module.exports = function(io){
 
-    io.on('connection', function(socket){
+    io.on('connection', function(socket){ // Realtime Andon Board Panel
 
         socket.on('dateAndprocess', function(dateAndprocess_obj){   // socket listener for date and process
+            console.log(dateAndprocess_obj);
             function dateAndprocess_obj_isValid(){ // check if obj is valid
                 return new Promise(function(resolve, reject){
 
@@ -620,7 +621,7 @@ module.exports = function(io){
                 });
             }
 
-            mysqlMES.poolMES.getConnection(function(err, connection){ // Scrap DPPM Pool
+            mysqlMES.poolMES.getConnection(function(err, connection){ // OEE Pool
 
                 dateAndprocess_obj_isValid().then(function(dateAndprocess_obj_valid){
                     function is_shift_AMorPM(){ //  check if AM or PM
@@ -648,7 +649,7 @@ module.exports = function(io){
                     }
                     
                     is_shift_AMorPM().then(function(AMorPM){
-                        function out_qty_per_tool(){ // function query for outs
+                        function out_qty_per_tool(){ // function query for outs PER TOOL
                             return new Promise(function(resolve, reject){ 
 
                                 let datetime = moment(dateAndprocess_obj[0].dtime).format('YYYY-MM-DD');
@@ -661,8 +662,8 @@ module.exports = function(io){
                                 if(AMorPM == 'AM'){
                                     
                                     connection.query({
-                                        sql: 'SELECT B.eq_name, SUM(C.out_qty) AS out_qty FROM		 (SELECT eq_id, proc_id  FROM MES_EQ_PROCESS   GROUP BY eq_id ) A     JOIN   MES_EQ_INFO B   ON A.eq_id = B.eq_id   JOIN   MES_OUT_DETAILS C     ON A.eq_id = C.eq_id   WHERE C.process_id = ? AND C.date_time >= CONCAT(?," 06:30:00") && C.date_time <= CONCAT(? + INTERVAL 0 DAY," 18:29:59")  GROUP BY B.eq_name',
-                                        values: [process, datetime, datetime]
+                                        sql: 'SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE))   AND A.process_id = ?  GROUP BY B.eq_name',
+                                        values: [datetime, process]
                 
                                     },  function(err, results, fields){
                                         //console.log(results);
@@ -673,8 +674,8 @@ module.exports = function(io){
                                 } else if(AMorPM == 'PREPM'){
 
                                     connection.query({
-                                        sql: 'SELECT B.eq_name, SUM(C.out_qty) AS out_qty FROM		 (SELECT eq_id, proc_id  FROM MES_EQ_PROCESS   GROUP BY eq_id ) A     JOIN   MES_EQ_INFO B   ON A.eq_id = B.eq_id   JOIN   MES_OUT_DETAILS C     ON A.eq_id = C.eq_id   WHERE C.process_id = ? AND C.date_time >= CONCAT(?," 18:30:00") && C.date_time <= CONCAT(? + INTERVAL 0 DAY," 23:59:59")  GROUP BY B.eq_name',
-                                        values: [process, datetime, datetime]
+                                        sql: 'SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE))   AND A.process_id = ?  GROUP BY B.eq_name',
+                                        values: [datetime, process]
                 
                                     },  function(err, results, fields){
                                         //console.log(results);
@@ -685,8 +686,8 @@ module.exports = function(io){
                                 } else if(AMorPM == 'POSTPM'){
 
                                     connection.query({
-                                        sql: 'SELECT B.eq_name, SUM(C.out_qty) AS out_qty FROM		 (SELECT eq_id, proc_id  FROM MES_EQ_PROCESS   GROUP BY eq_id ) A     JOIN   MES_EQ_INFO B   ON A.eq_id = B.eq_id   JOIN   MES_OUT_DETAILS C     ON A.eq_id = C.eq_id   WHERE C.process_id = ? AND C.date_time >= CONCAT(? + INTERVAL -1 DAY," 18:30:00") && C.date_time <= CONCAT(? + INTERVAL 0 DAY," 06:29:59")  GROUP BY B.eq_name',
-                                        values: [process, datetime, datetime]
+                                        sql: 'SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY))   AND A.process_id = ?  GROUP BY B.eq_name ',
+                                        values: [datetime, process]
                 
                                     },  function(err, results, fields){
                                         //console.log(results);
@@ -699,8 +700,99 @@ module.exports = function(io){
                             });
                         }
 
-                        out_qty_per_tool().then(function(outs_per_tool_results){
+                        function uph_per_tool(){
+                            return new Promise(function(resolve, reject){
 
+                                let datetime = moment(dateAndprocess_obj[0].dtime).format('YYYY-MM-DD');
+                                let process = dateAndprocess_obj[0].process_name;
+
+                                connection.query({
+                                    sql: 'SET time_zone = "+08:00"'
+                                });
+
+                                connection.query({
+                                    sql: 'SELECT * FROM fab4_lookup.fab4_tool_uph WHERE fab_week = "1802" AND process = ?',
+                                    values: [process]
+                                },  function(err, results, fields){
+                                        //console.log(results);
+                                        let uph_per_tool_results = results;
+                                        resolve(uph_per_tool_results);
+                                });
+
+                            });
+                        }
+
+                        function fab_hour(){
+                            return new Promise(function(resolve, reject){
+                                let datetime = moment(dateAndprocess_obj[0].dtime).format('YYYY-MM-DD');
+                                let process = dateAndprocess_obj[0].process_name;
+
+                                connection.query({
+                                    sql: 'SET time_zone = "+08:00"'
+                                });
+
+                                if(AMorPM == 'AM'){
+
+                                    connection.query({
+                                        sql: 'SELECT HOUR(DATE_ADD(date_time, INTERVAL -390 MINUTE)) + 1 AS fab_hour FROM MES_OUT_DETAILS WHERE process_id = ?  AND DATE(DATE_ADD(date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) GROUP BY process_id, fab_hour ORDER BY fab_hour DESC LIMIT 1',
+                                        values: [process, datetime]
+                                    },  function(err, results, fields){
+                                            //console.log(results);
+                                            let fab_hour_results = results;
+                                            resolve(fab_hour_results);
+                                    });
+
+                                } else if(AMorPM == 'PREPM'){
+
+                                    connection.query({
+                                        sql: 'SELECT HOUR(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) + 1 AS fab_hour FROM MES_OUT_DETAILS WHERE process_id = ?  AND DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) GROUP BY process_id, fab_hour ORDER BY fab_hour DESC LIMIT 1',
+                                        values: [process, datetime]
+                                    },  function(err, results, fields){
+                                            //console.log(results);
+                                            let fab_hour_results = results;
+                                            resolve(fab_hour_results);
+                                    });
+
+                                } else if(AMorPM == 'POSTPM'){
+
+                                    connection.query({
+                                        sql: 'SELECT HOUR(DATE_ADD(date_time + INTERVAL -1 DAY, INTERVAL -1110 MINUTE)) + 1 AS fab_hour FROM MES_OUT_DETAILS WHERE process_id = ?  AND DATE(DATE_ADD(date_time, INTERVAL -0 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) GROUP BY process_id, fab_hour ORDER BY fab_hour DESC LIMIT 1',
+                                        values: [process, datetime]
+                                    },  function(err, results, fields){
+                                            //console.log(results);
+                                            let fab_hour_results = results;
+                                            resolve(fab_hour_results);
+                                    });
+
+                                }
+
+                                
+                            });
+                        }
+
+
+                        out_qty_per_tool().then(function(outs_per_tool_results){
+                            return uph_per_tool().then(function(uph_per_tool_results){
+                                return fab_hour().then(function(fab_hour_results){
+                                    let uph_per_tool_obj = [];
+
+                                    for(let i=0; i<uph_per_tool_results.length;i++){
+                                        uph_per_tool_obj.push({
+                                            tool_name: uph_per_tool_results[i].eq_name,
+                                            tool_uph: uph_per_tool_results[i].uph,
+                                            target_oee: uph_per_tool_results[i].target_oee
+                                        });
+                                    }
+
+                                    socket.emit('oee', uph_per_tool_obj);
+
+                                    console.log(outs_per_tool_results);
+                                    console.log(uph_per_tool_obj);
+                                    console.log(fab_hour_results);
+                                });
+                                
+                            });
+                                
                         });
                         
                     });
