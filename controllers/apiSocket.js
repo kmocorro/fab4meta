@@ -280,7 +280,7 @@ module.exports = function(io){
                                 } else if(AMorPM == 'POSTPM'){
 
                                     connection.query({
-                                        sql: 'SELECT A.eq_name AS eq_name, A.scrap_qty AS scrap_qty, B.out_qty AS out_qty FROM   (SELECT B.eq_name, SUM(A.scrap_qty) AS scrap_qty    FROM MES_SCRAP_DETAILS A      JOIN MES_EQ_INFO B  ON A.eq_id = B.eq_id     WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE))   AND A.process_id = ?     GROUP BY B.eq_name ) A JOIN   (SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY))   AND A.process_id = ?  GROUP BY B.eq_name ) B ON A.eq_name = B.eq_name',
+                                        sql: 'SELECT A.eq_name AS eq_name, A.scrap_qty AS scrap_qty, B.out_qty AS out_qty FROM   (SELECT B.eq_name, SUM(A.scrap_qty) AS scrap_qty    FROM MES_SCRAP_DETAILS A      JOIN MES_EQ_INFO B  ON A.eq_id = B.eq_id     WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY))   AND A.process_id = ?     GROUP BY B.eq_name ) A JOIN   (SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY))   AND A.process_id = ?  GROUP BY B.eq_name ) B ON A.eq_name = B.eq_name',
                                         values: [datetime, process, datetime, process]
                 
                                     },  function(err, results, fields){
@@ -504,7 +504,7 @@ module.exports = function(io){
                                 } else if(AMorPM == 'POSTPM'){
 
                                     connection.query({
-                                        sql: 'SELECT A.proc_id , SUM(C.out_qty) AS out_qty FROM		 (SELECT eq_id, proc_id  FROM MES_EQ_PROCESS   GROUP BY eq_id ) A     JOIN   MES_EQ_INFO B   ON A.eq_id = B.eq_id   JOIN   MES_OUT_DETAILS C     ON A.eq_id = C.eq_id   WHERE C.process_id = ? AND C.date_time >= CONCAT(?, + INTERVAL -1 DAY, " 18:30:00") && C.date_time <= CONCAT(? + INTERVAL 0 DAY," 06:29:59")',
+                                        sql: 'SELECT A.proc_id , SUM(C.out_qty) AS out_qty FROM		 (SELECT eq_id, proc_id  FROM MES_EQ_PROCESS   GROUP BY eq_id ) A     JOIN   MES_EQ_INFO B   ON A.eq_id = B.eq_id   JOIN   MES_OUT_DETAILS C     ON A.eq_id = C.eq_id   WHERE C.process_id = ? AND C.date_time >= CONCAT(? + INTERVAL -1 DAY, " 18:30:00") && C.date_time <= CONCAT(? + INTERVAL 0 DAY," 06:29:59")',
                                         values: [process, datetime, datetime]
                 
                                     },  function(err, results, fields){
@@ -522,7 +522,7 @@ module.exports = function(io){
                             return out_qty().then(function(outs_results){
                                 function cleaning4ScrapDPPM(){ // cleaning result object
                                     return new Promise(function(resolve, reject){
-                                        if(typeof scrap_results != 'undefined' || scrap_results != null || typeof outs_results != 'undefined' || outs_results != null){
+                                        if(typeof scrap_results != 'undefined' || scrap_results != null || typeof outs_results[0] != 'undefined' || outs_results[0] != null){
 
                                             let scrap_details = [];
                                             let xBarDPPM = [];
