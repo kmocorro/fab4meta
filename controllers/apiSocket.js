@@ -789,6 +789,7 @@ module.exports = function(io){
                                     console.log(outs_per_tool_results);
                                     console.log(uph_per_tool_obj);
                                     console.log(fab_hour_results);
+                                    connection.release(); // release woo.
                                 });
                                 
                             });

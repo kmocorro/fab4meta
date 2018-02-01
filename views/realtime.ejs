@@ -457,6 +457,11 @@
             Plotly.update('linearity-chart', dataLinear, layout );
             /** -- Linearity Chart -- */
 
+            let dateAndprocess_obj = [];
+            dateAndprocess_obj.push({
+                dtime: new Date(), 
+                process_name: '<%= process %>'
+            });
             socket.emit('dateAndprocess', dateAndprocess_obj );
 
         });
@@ -481,6 +486,11 @@
             Plotly.update('yield-chart', dataYield, layout );
             /** -- YieldperTool Chart -- */
 
+            let dateAndprocess_obj = [];
+            dateAndprocess_obj.push({
+                dtime: new Date(), 
+                process_name: '<%= process %>'
+            });
             socket.emit('yieldPerTool', dateAndprocess_obj );
         });
 
@@ -503,6 +513,11 @@
             Plotly.update('scrap_chart', dataScrap, layout );
             /** -- scrap DPPM  chart -- */
 
+            let dateAndprocess_obj = [];
+            dateAndprocess_obj.push({
+                dtime: new Date(), 
+                process_name: '<%= process %>'
+            });
             socket.emit('scrapDPPM', dateAndprocess_obj );
         });
 
@@ -513,6 +528,11 @@
 
             /** -- oee chart -- */
             
+            let dateAndprocess_obj = [];
+            dateAndprocess_obj.push({
+                dtime: new Date(), 
+                process_name: '<%= process %>'
+            });
             socket.emit('oee', dateAndprocess_obj ); // emitter for oee
         });
         /** -- socket listeners -- */
