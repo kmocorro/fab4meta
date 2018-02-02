@@ -42,13 +42,13 @@ module.exports = function(io){
     
                             if(today_date >= shift_AM_start && today_date <= shift_AM_end){ // AM shift
                                 resolve('AM');
-                                console.log('AM');
+                              //  console.log('AM');
                             } else if(today_date >= shift_PM_start && today_date <= shift_MID_pre) { // PREPM shift
                                 resolve('PREPM');
-                                console.log('PREPM');
+                              //  console.log('PREPM');
                             } else if(today_date >= shift_MID_start && today_date <= shift_PM_end){
                                 resolve('POSTPM');
-                                console.log('POSTPM');
+                               // console.log('POSTPM');
                             }
                         });
                     }
@@ -234,13 +234,13 @@ module.exports = function(io){
     
                             if(today_date >= shift_AM_start && today_date <= shift_AM_end){ // AM shift
                                 resolve('AM');
-                                console.log('AM');
+                              //  console.log('AM');
                             } else if(today_date >= shift_PM_start && today_date <= shift_MID_pre) { // PREPM shift
                                 resolve('PREPM');
-                                console.log('PREPM');
+                              //  console.log('PREPM');
                             } else if(today_date >= shift_MID_start && today_date <= shift_PM_end){
                                 resolve('POSTPM');
-                                console.log('POSTPM');
+                             //   console.log('POSTPM');
                             }
                         });
                     }
@@ -404,13 +404,13 @@ module.exports = function(io){
     
                             if(today_date >= shift_AM_start && today_date <= shift_AM_end){ // AM shift
                                 resolve('AM');
-                                console.log('AM');
+                             //   console.log('AM');
                             } else if(today_date >= shift_PM_start && today_date <= shift_MID_pre) { // PREPM shift
                                 resolve('PREPM');
-                                console.log('PREPM');
+                              //  console.log('PREPM');
                             } else if(today_date >= shift_MID_start && today_date <= shift_PM_end){
                                 resolve('POSTPM');
-                                console.log('POSTPM');
+                             //   console.log('POSTPM');
                             }
                         });
                     }
@@ -485,7 +485,7 @@ module.exports = function(io){
                                         values: [process, datetime, datetime]
                 
                                     },  function(err, results, fields){
-                                        console.log(results);
+                                     //   console.log(results);
                                        let outs_results = results;
                                         resolve(outs_results);
                                     });
@@ -497,7 +497,7 @@ module.exports = function(io){
                                         values: [process, datetime, datetime]
                 
                                     },  function(err, results, fields){
-                                       console.log(results);
+                                     //  console.log(results);
                                        let outs_results = results;
                                         resolve(outs_results);
                                     });
@@ -509,7 +509,7 @@ module.exports = function(io){
                                         values: [process, datetime, datetime]
                 
                                     },  function(err, results, fields){
-                                        console.log(results);
+                                     //   console.log(results);
                                        let outs_results = results;
                                         resolve(outs_results);
                                     });
@@ -637,13 +637,13 @@ module.exports = function(io){
     
                             if(today_date >= shift_AM_start && today_date <= shift_AM_end){ // AM shift
                                 resolve('AM');
-                                console.log('AM');
+                             //   console.log('AM');
                             } else if(today_date >= shift_PM_start && today_date <= shift_MID_pre) { // PREPM shift
                                 resolve('PREPM');
-                                console.log('PREPM');
+                             //   console.log('PREPM');
                             } else if(today_date >= shift_MID_start && today_date <= shift_PM_end){
                                 resolve('POSTPM');
-                                console.log('POSTPM');
+                            //    console.log('POSTPM');
                             }
                         });
                     }
@@ -786,7 +786,7 @@ module.exports = function(io){
                             return uph_per_tool().then(function(uph_per_tool_results){
                                 return fab_hour().then(function(fab_hour_results){
 
-                                    console.log(outs_per_tool_results);
+                                   // console.log(outs_per_tool_results);
 
                                     let outs_per_tool_obj = [];
                                     let uph_per_tool_obj = [];
@@ -885,7 +885,7 @@ module.exports = function(io){
 
                                     let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0]];
 
-                                    console.log(OEE_Trace);
+                                    //console.log(OEE_Trace);
 
                                     socket.emit('oee', OEE_Trace);
                                     connection.release(); // release woo.
