@@ -778,6 +778,41 @@ module.exports = function(io){
                         function status_per_tool(){
                             return new Promise(function(resolve, reject){
                                  
+                                let datetime = moment(dateAndprocess_obj[0].dtime).format('YYYY-MM-DD');
+                                let process = dateAndprocess_obj[0].process_name;
+
+                                connection.query({
+                                    sql: 'SET time_zone = "+08:00"'
+                                });
+
+                                if(AMorPM == "AM"){
+
+                                    connection.query({
+                                        sql: 'SELECT pretty_table.eq_name, COALESCE(P,0) AS P,  COALESCE(SU,0) AS SU,   COALESCE(SD,0) AS SD,  COALESCE(D,0) AS D,  COALESCE(E,0) AS E, COALESCE(SB,0) AS SB  FROM (SELECT extended_table.eq_name,   SUM(P) AS P,    SUM(SU) AS SU,   SUM(SD) AS SD,    SUM(D) AS D,    SUM(E) AS E,  SUM(SB) AS SB FROM  (SELECT base_table.*,   CASE WHEN base_table.stat_id = "P" THEN base_table.duration END AS P,   CASE WHEN base_table.stat_id = "SU" THEN base_table.duration END AS SU,   CASE WHEN base_table.stat_id = "SD" THEN base_table.duration END AS SD,   CASE WHEN base_table.stat_id = "D" THEN base_table.duration END AS D,  CASE WHEN base_table.stat_id = "E" THEN base_table.duration END AS E,   CASE WHEN base_table.stat_id = "SB" THEN base_table.duration END AS SB  FROM (SELECT G.eq_name,  G.stat_id,  SUM(ROUND(TIME_TO_SEC(TIMEDIFF(G.time_out,G.time_in))/3600,2)) as duration FROM  (SELECT  C.eq_name,    B.stat_id,    IF(B.time_in <= CONCAT(?," 06:30:00") && B.time_out >= CONCAT(?," 06:30:00"),CONCAT(?," 06:30:00"),IF(B.time_in <= CONCAT(?, " 06:30:00"),CONCAT(?," 06:30:00"),IF(B.time_in >= CONCAT(? + INTERVAL 1 DAY, " 06:30:00"),CONCAT(? + INTERVAL 1 DAY," 06:30:00"),B.time_in))) AS time_in ,    IF(B.time_in <= CONCAT(? + INTERVAL 1 DAY," 06:30:00") && B.time_out >= CONCAT(? + INTERVAL 1 DAY, " 06:30:00"),CONCAT(? + INTERVAL 1 DAY, " 06:30:00"),IF(B.time_out <= CONCAT(? , " 06:30:00"),CONCAT(?," 06:30:00"),IF(B.time_out >= CONCAT(? + INTERVAL 1 DAY, " 06:30:00"),CONCAT(? + INTERVAL 1 DAY," 06:30:00"),IF(B.time_out IS NULL && B.time_in < CONCAT(? + INTERVAL 1 DAY," 06:30:00") ,CONVERT_TZ(NOW(),@@SESSION.TIME_ZONE,"+08:00"),B.time_out)))) AS time_out   FROM  (SELECT eq_id, proc_id    FROM MES_EQ_PROCESS    WHERE proc_id = ? GROUP BY eq_id) A   JOIN      MES_EQ_CSTAT_HEAD B    ON A.eq_id = B.eq_id   JOIN     MES_EQ_INFO C   ON A.eq_id = C.eq_id    WHERE    B.time_in >= CONCAT(? - INTERVAL 1 DAY," 00:00:00")   AND A.proc_id = ?) G GROUP BY G.eq_name, G.stat_id) base_table) extended_table  GROUP BY extended_table.eq_name) pretty_table  ',
+                                        values: [datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, process, datetime, process]
+                
+                                    },  function(err, results, fields){
+                                       // console.log(results);
+                                       let status_results = results;
+                                        resolve(status_results);
+                                    });
+
+                                } else if(AMorPM == "PREPM" || AMorPM == "POSTPM"){
+
+                                    connection.query({
+                                        sql: 'SELECT pretty_table.eq_name, COALESCE(P,0) AS P,  COALESCE(SU,0) AS SU,   COALESCE(SD,0) AS SD,  COALESCE(D,0) AS D,  COALESCE(E,0) AS E, COALESCE(SB,0) AS SB  FROM (SELECT extended_table.eq_name,   SUM(P) AS P,    SUM(SU) AS SU,   SUM(SD) AS SD,    SUM(D) AS D,    SUM(E) AS E,  SUM(SB) AS SB FROM  (SELECT base_table.*,   CASE WHEN base_table.stat_id = "P" THEN base_table.duration END AS P,   CASE WHEN base_table.stat_id = "SU" THEN base_table.duration END AS SU,   CASE WHEN base_table.stat_id = "SD" THEN base_table.duration END AS SD,   CASE WHEN base_table.stat_id = "D" THEN base_table.duration END AS D,  CASE WHEN base_table.stat_id = "E" THEN base_table.duration END AS E,   CASE WHEN base_table.stat_id = "SB" THEN base_table.duration END AS SB  FROM (SELECT G.eq_name,  G.stat_id,  SUM(ROUND(TIME_TO_SEC(TIMEDIFF(G.time_out,G.time_in))/3600,2)) as duration FROM  (SELECT  C.eq_name,    B.stat_id,    IF(B.time_in <= CONCAT(?," 18:30:00") && B.time_out >= CONCAT(?," 18:30:00"),CONCAT(?," 18:30:00"),IF(B.time_in <= CONCAT(?, " 18:30:00"),CONCAT(?," 18:30:00"),IF(B.time_in >= CONCAT(? + INTERVAL 1 DAY, " 18:30:00"),CONCAT(? + INTERVAL 1 DAY," 18:30:00"),B.time_in))) AS time_in ,    IF(B.time_in <= CONCAT(? + INTERVAL 1 DAY," 18:30:00") && B.time_out >= CONCAT(? + INTERVAL 1 DAY, " 18:30:00"),CONCAT(? + INTERVAL 1 DAY, " 18:30:00"),IF(B.time_out <= CONCAT(? , " 18:30:00"),CONCAT(?," 18:30:00"),IF(B.time_out >= CONCAT(? + INTERVAL 1 DAY, " 18:30:00"),CONCAT(? + INTERVAL 1 DAY," 18:30:00"),IF(B.time_out IS NULL && B.time_in < CONCAT(? + INTERVAL 1 DAY," 18:30:00") ,CONVERT_TZ(NOW(),@@SESSION.TIME_ZONE,"+08:00"),B.time_out)))) AS time_out   FROM  (SELECT eq_id, proc_id    FROM MES_EQ_PROCESS    WHERE proc_id = ? GROUP BY eq_id) A   JOIN      MES_EQ_CSTAT_HEAD B    ON A.eq_id = B.eq_id   JOIN     MES_EQ_INFO C   ON A.eq_id = C.eq_id    WHERE    B.time_in >= CONCAT(? - INTERVAL 1 DAY," 00:00:00")   AND A.proc_id = ?) G GROUP BY G.eq_name, G.stat_id) base_table) extended_table  GROUP BY extended_table.eq_name) pretty_table  ',
+                                        values: [datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, process, datetime, process]
+                
+                                    },  function(err, results, fields){
+                                        //console.log(results);
+                                       let status_results = results;
+                                        resolve(status_results);
+                                    });
+
+
+                                }
+
+
                             });
                         }
                         /** -- Status per tool functions --  */
@@ -785,110 +820,244 @@ module.exports = function(io){
                         out_qty_per_tool().then(function(outs_per_tool_results){
                             return uph_per_tool().then(function(uph_per_tool_results){
                                 return fab_hour().then(function(fab_hour_results){
+                                    return status_per_tool().then(function(status_results){
 
-                                   // console.log(outs_per_tool_results);
+                                         //console.log(outs_per_tool_results);
+                                        //console.log(status_results);
 
-                                    let outs_per_tool_obj = [];
-                                    let uph_per_tool_obj = [];
-                                    let fab_hour_obj = [];
+                                        let outs_per_tool_obj = [];
+                                        let uph_per_tool_obj = [];
+                                        let fab_hour_obj = [];
+                                        let status_obj = [];
 
-                                    let oee_value_per_tool_obj = [];
+                                        let oee_value_per_tool_obj = [];
 
-                                    let xOEELine = [];
-                                    let yOEELine = [];
+                                        let xOEELine = [];
+                                        let yOEELine = [];
 
-                                    let xOEEtarget = [];
-                                    let yOEEtarget = [];
+                                        let xOEEtarget = [];
+                                        let yOEEtarget = [];
 
-                                    let oeeTrace_obj = [];
-                                    let oeeTrace_target_obj =[];
+                                        let xStatusBar = [];
+                                        let yStatusBar_P = [];
+                                        let yStatusBar_SU = [];
+                                        let yStatusBar_SD = [];
+                                        let yStatusBar_D = [];
+                                        let yStatusBar_E = [];
+                                        let yStatusBar_SB = [];
+                                        let nameStatusBar = [];
+                                        let statusArr = [];
 
-                                    // cleaning outs per tool results 
-                                    for(let i=0; i<outs_per_tool_results.length;i++){
-                                        outs_per_tool_obj.push({
-                                            tool_name: outs_per_tool_results[i].eq_name,
-                                            out_qty: outs_per_tool_results[i].out_qty
-                                        });
-                                    }
 
-                                    // cleaning uph per tool results
-                                    for(let i=0; i<uph_per_tool_results.length;i++){
-                                        uph_per_tool_obj.push({
-                                            eq_alias: uph_per_tool_results[i].eq_alias,
-                                            tool_name: uph_per_tool_results[i].eq_name,
-                                            tool_uph: uph_per_tool_results[i].uph,
-                                            target_oee: (uph_per_tool_results[i].target_oee * 100).toFixed(0)
-                                        });
-                                    }
+                                        let oeeTrace_obj = [];
+                                        let oeeTrace_target_obj =[];
+                                        let oeeTrace_status = [];
 
-                                    // cleaning fab hour results 
-                                    fab_hour_obj.push({
-                                        hour: fab_hour_results[0].fab_hour
-                                    });
-                                
-                                    // compute oee
-                                    for(let i=0;i<outs_per_tool_obj.length; i++){
 
-                                        if(uph_per_tool_obj[i].tool_name){
-                                            oee_value_per_tool_obj.push({
-                                                tool: uph_per_tool_obj[i].eq_alias,
-                                                oee: ((outs_per_tool_obj[i].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0)
+                                        // cleaning outs per tool results 
+                                        for(let i=0; i < outs_per_tool_results.length; i++){
+
+                                            outs_per_tool_obj.push({
+                                                tool_name: outs_per_tool_results[i].eq_name,
+                                                out_qty: outs_per_tool_results[i].out_qty
                                             });
+
+                                        }
+
+
+                                        // cleaning uph per tool results
+                                        for(let i=0; i < uph_per_tool_results.length; i++){
+
+                                            uph_per_tool_obj.push({
+                                                eq_alias: uph_per_tool_results[i].eq_alias,
+                                                tool_name: uph_per_tool_results[i].eq_name,
+                                                tool_uph: uph_per_tool_results[i].uph,
+                                                target_oee: (uph_per_tool_results[i].target_oee * 100).toFixed(0)
+                                            });
+
                                         }
                                         
-                                    }
+                                        console.log(uph_per_tool_obj);
 
-                                    // feed the xy coord
-                                    for(let i=0;i<oee_value_per_tool_obj.length;i++){
+                                        // cleaning fab hour results 
+                                        fab_hour_obj.push({
+                                            hour: fab_hour_results[0].fab_hour
+                                        });
 
-                                        xOEELine.push(
-                                            oee_value_per_tool_obj[i].tool
-                                        );
 
-                                        yOEELine.push(
-                                            oee_value_per_tool_obj[i].oee
-                                        );
-
-                                        xOEEtarget.push(
-                                            oee_value_per_tool_obj[i].tool
-                                        );
-
-                                        yOEEtarget.push(
-                                            uph_per_tool_obj[i].target_oee
-                                        )
-
-                                    }
-
-                                    // combine to make a plotly data
-
-                                    oeeTrace_obj.push({
-                                        x: xOEELine,
-                                        y: yOEELine,
-                                        type: 'scatter',
-                                        name: 'OEE',
-                                        line: {
-                                            width: '1.5'
+                                        // cleaning status per tool results
+                                        for(let i=0; i<status_results.length;i++){
+                                            status_obj.push({
+                                                tool: status_results[i].eq_name,
+                                                P: status_results[i].P ,
+                                                SU: status_results[i].SU ,
+                                                SD: status_results[i].SD ,
+                                                D: status_results[i].D ,
+                                                E: status_results[i].E ,
+                                                SB: status_results[i].SB
+                                            });
                                         }
-                                    });
+                                    
 
-                                    oeeTrace_target_obj.push({
-                                        x: xOEEtarget,
-                                        y: yOEEtarget,
-                                        type: 'scatter',
-                                        mode: 'lines',
-                                        name: 'target',
-                                        line : {
-                                            width: '0.5',
-                                            color: 'rgb(255, 0, 0)',
+                                        // compute oee
+                                        for(let i=0;i<uph_per_tool_obj.length; i++){
+                                            
+                                            if(uph_per_tool_obj[i].tool_name){
+                                                
+                                                if(typeof outs_per_tool_obj[i] === 'undefined'){
+
+                                                    oee_value_per_tool_obj.push({
+                                                        tool: uph_per_tool_obj[i].eq_alias,
+                                                        oee: (( 0 / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0),
+                                                        target_oee : uph_per_tool_obj[i].target_oee
+                                                    });
+    
+                                                } else if(typeof outs_per_tool_obj[i] !== 'undefined') {
+                                                    
+                                                    oee_value_per_tool_obj.push({
+                                                        tool: uph_per_tool_obj[i].eq_alias,
+                                                        oee: (( outs_per_tool_obj[i].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0),
+                                                        target_oee : uph_per_tool_obj[i].target_oee
+                                                    });
+    
+                                                }
+                                            }
+                                            
+
+                                            
                                         }
+
+                                        console.log(oee_value_per_tool_obj);
+                                        // feed the xy coord LINE
+                                        for(let i=0;i<oee_value_per_tool_obj.length;i++){
+                                            
+                                                xOEELine.push(
+                                                    oee_value_per_tool_obj[i].tool
+                                                );
+    
+                                                yOEELine.push(
+                                                    oee_value_per_tool_obj[i].oee
+                                                );
+    
+                                                xOEEtarget.push(
+                                                    oee_value_per_tool_obj[i].tool
+                                                );
+    
+                                                yOEEtarget.push(
+                                                    oee_value_per_tool_obj[i].target_oee
+                                                );
+                                        }
+
+                                        // feed the xy coord BAR
+                                        for(let i=0;i<status_obj.length;i++){
+
+                                            if(status_obj[i].tool == uph_per_tool_obj[i].tool_name){
+                                                
+                                                xStatusBar.push(
+                                                    uph_per_tool_obj[i].eq_alias
+                                                );
+
+                                            }
+
+                                            yStatusBar_P.push(
+                                                status_obj[i].P
+                                            );
+
+                                            yStatusBar_SU.push(
+                                                status_obj[i].SU
+                                            );
+
+                                            yStatusBar_SD.push(
+                                                status_obj[i].SD
+                                            );
+
+                                            yStatusBar_D.push(
+                                                status_obj[i].D
+                                            );
+
+                                            yStatusBar_E.push(
+                                                status_obj[i].E
+                                            );
+
+                                            yStatusBar_SB.push(
+                                                status_obj[i].SB
+                                            );
+
+                                        }
+
+                                        // combine to make a plotly data
+
+                                        oeeTrace_obj.push({
+                                            x: xOEELine,
+                                            y: yOEELine,
+                                            type: 'scatter',
+                                            name: 'OEE',
+                                            line: {
+                                                width: '1.5'
+                                            }
+                                        });
+
+                                        oeeTrace_target_obj.push({
+                                            x: xOEEtarget,
+                                            y: yOEEtarget,
+                                            type: 'scatter',
+                                            mode: 'lines',
+                                            name: 'target',
+                                            line : {
+                                                width: '0.5',
+                                                color: 'rgb(255, 0, 0)',
+                                            }
+                                        });
+
+                                        oeeTrace_status.push(
+                                            {
+                                                x: xStatusBar,
+                                                y: yStatusBar_P,
+                                                name: 'Production',
+                                                type: 'bar'
+                                            },
+                                            {
+                                                x: xStatusBar,
+                                                y: yStatusBar_SU,
+                                                name: 'Setup',
+                                                type: 'bar'
+                                            },
+                                            {
+                                                x: xStatusBar,
+                                                y: yStatusBar_SD,
+                                                name: 'Scheduled DT',
+                                                type: 'bar'
+                                            },
+                                            {
+                                                x: xStatusBar,
+                                                y: yStatusBar_D,
+                                                name: 'Unscheduled DT',
+                                                type: 'bar'
+                                            },
+                                            {
+                                                x: xStatusBar,
+                                                y: yStatusBar_E,
+                                                name: 'Engineering',
+                                                type: 'bar'
+                                            },
+                                            {
+                                                x: xStatusBar,
+                                                y: yStatusBar_SB,
+                                                name: 'Stand-by',
+                                                type: 'bar'
+                                            },
+                                        );
+
+                                        let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0], oeeTrace_status[0], oeeTrace_status[1], oeeTrace_status[2], oeeTrace_status[3], oeeTrace_status[4], oeeTrace_status[5]];
+
+                                        console.log(oeeTrace_obj[0]);
+
+                                        socket.emit('oee', OEE_Trace);
+                                        connection.release(); // release woo.
+
+
                                     });
-
-                                    let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0]];
-
-                                    //console.log(OEE_Trace);
-
-                                    socket.emit('oee', OEE_Trace);
-                                    connection.release(); // release woo.
+                                    
                                 });
                                 
                             });
