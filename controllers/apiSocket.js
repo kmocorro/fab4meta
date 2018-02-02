@@ -822,7 +822,7 @@ module.exports = function(io){
                                 return fab_hour().then(function(fab_hour_results){
                                     return status_per_tool().then(function(status_results){
 
-                                         //console.log(outs_per_tool_results);
+                                        // console.log(outs_per_tool_results);
                                         //console.log(status_results);
 
                                         let outs_per_tool_obj = [];
@@ -855,35 +855,27 @@ module.exports = function(io){
 
 
                                         // cleaning outs per tool results 
-                                        for(let i=0; i < outs_per_tool_results.length; i++){
-
+                                        for(let i=0; i<outs_per_tool_results.length;i++){
                                             outs_per_tool_obj.push({
                                                 tool_name: outs_per_tool_results[i].eq_name,
                                                 out_qty: outs_per_tool_results[i].out_qty
                                             });
-
                                         }
 
-
                                         // cleaning uph per tool results
-                                        for(let i=0; i < uph_per_tool_results.length; i++){
-
+                                        for(let i=0; i<uph_per_tool_results.length;i++){
                                             uph_per_tool_obj.push({
                                                 eq_alias: uph_per_tool_results[i].eq_alias,
                                                 tool_name: uph_per_tool_results[i].eq_name,
                                                 tool_uph: uph_per_tool_results[i].uph,
                                                 target_oee: (uph_per_tool_results[i].target_oee * 100).toFixed(0)
                                             });
-
                                         }
-                                        
-                                        console.log(uph_per_tool_obj);
 
                                         // cleaning fab hour results 
                                         fab_hour_obj.push({
                                             hour: fab_hour_results[0].fab_hour
                                         });
-
 
                                         // cleaning status per tool results
                                         for(let i=0; i<status_results.length;i++){
@@ -894,58 +886,41 @@ module.exports = function(io){
                                                 SD: status_results[i].SD ,
                                                 D: status_results[i].D ,
                                                 E: status_results[i].E ,
-                                                SB: status_results[i].SB
+                                                SB: status_results[i].SB 
                                             });
                                         }
                                     
-
                                         // compute oee
-                                        for(let i=0;i<uph_per_tool_obj.length; i++){
-                                            
+                                        for(let i=0;i<outs_per_tool_obj.length; i++){
+
                                             if(uph_per_tool_obj[i].tool_name){
-                                                
-                                                if(typeof outs_per_tool_obj[i] === 'undefined'){
-
-                                                    oee_value_per_tool_obj.push({
-                                                        tool: uph_per_tool_obj[i].eq_alias,
-                                                        oee: (( 0 / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0),
-                                                        target_oee : uph_per_tool_obj[i].target_oee
-                                                    });
-    
-                                                } else if(typeof outs_per_tool_obj[i] !== 'undefined') {
-                                                    
-                                                    oee_value_per_tool_obj.push({
-                                                        tool: uph_per_tool_obj[i].eq_alias,
-                                                        oee: (( outs_per_tool_obj[i].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0),
-                                                        target_oee : uph_per_tool_obj[i].target_oee
-                                                    });
-    
-                                                }
+                                                oee_value_per_tool_obj.push({
+                                                    tool: uph_per_tool_obj[i].eq_alias,
+                                                    oee: ((outs_per_tool_obj[i].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0)
+                                                });
                                             }
-                                            
-
                                             
                                         }
 
-                                        console.log(oee_value_per_tool_obj);
                                         // feed the xy coord LINE
                                         for(let i=0;i<oee_value_per_tool_obj.length;i++){
-                                            
-                                                xOEELine.push(
-                                                    oee_value_per_tool_obj[i].tool
-                                                );
-    
-                                                yOEELine.push(
-                                                    oee_value_per_tool_obj[i].oee
-                                                );
-    
-                                                xOEEtarget.push(
-                                                    oee_value_per_tool_obj[i].tool
-                                                );
-    
-                                                yOEEtarget.push(
-                                                    oee_value_per_tool_obj[i].target_oee
-                                                );
+
+                                            xOEELine.push(
+                                                oee_value_per_tool_obj[i].tool
+                                            );
+
+                                            yOEELine.push(
+                                                oee_value_per_tool_obj[i].oee
+                                            );
+
+                                            xOEEtarget.push(
+                                                oee_value_per_tool_obj[i].tool
+                                            );
+
+                                            yOEEtarget.push(
+                                                uph_per_tool_obj[i].target_oee
+                                            )
+
                                         }
 
                                         // feed the xy coord BAR
@@ -1050,7 +1025,7 @@ module.exports = function(io){
 
                                         let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0], oeeTrace_status[0], oeeTrace_status[1], oeeTrace_status[2], oeeTrace_status[3], oeeTrace_status[4], oeeTrace_status[5]];
 
-                                        console.log(oeeTrace_obj[0]);
+                                        //console.log(OEE_Trace);
 
                                         socket.emit('oee', OEE_Trace);
                                         connection.release(); // release woo.
