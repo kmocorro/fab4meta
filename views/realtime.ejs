@@ -173,10 +173,10 @@
                 <div class="nav-tabs-custom">
                     <!-- Tabs within a box -->
                     <ul class="nav nav-tabs pull-right">
-                        <li class="pull-left header"><i class="fa fa-bar-chart"></i> % Yield Loss</li>
+                        <li class="pull-left header"><i class="fa fa-bar-chart"></i> OEE</li>
                     </ul>
                     <div class="tab-content no-padding">
-                        <div class="chart tab-pane active" id="yield-chart" style=" height: 300px;"></div>
+                        <div class="chart tab-pane active" id="oee-chart" style=" height: 300px;"></div>
                     </div>
                 </div>
             </section>
@@ -188,10 +188,10 @@
                     <div class="nav-tabs-custom">
                         <!-- Tabs within a box -->
                         <ul class="nav nav-tabs pull-right">
-                            <li class="pull-left header"><i class="fa fa-line-chart"></i> OEE</li>
+                            <li class="pull-left header"><i class="fa fa-line-chart"></i> % Yield Loss</li>
                         </ul>
                         <div class="tab-content no-padding">
-                            <div class="chart tab-pane active" id="oee-chart" style=" height: 300px;"></div>
+                            <div class="chart tab-pane active" id="yield-chart" style=" height: 300px;"></div>
                         </div>
                     </div>
                 </section>
@@ -521,11 +521,23 @@
             socket.emit('scrapDPPM', dateAndprocess_obj );
         });
 
-        socket.on('oee', function(oee_objects){
-            console.log(oee_objects);
+        socket.on('oee', function(OEE_trace){
+            console.log(OEE_trace);
 
             /** oee chart */
-
+            var dataLineOEE = OEE_trace;
+            var layout = {
+                title: ('<%= process %>').toUpperCase() + ' | OEE',
+                margin: {
+                    l: 80,
+                    r: 100,
+                    b: 100,
+                    t: 50,
+                    pad: 4
+                },
+            }
+            Plotly.newPlot('oee-chart', dataLineOEE, layout, {displayModeBar: false});
+            Plotly.update('oee-chart', dataLineOEE, layout );
             /** -- oee chart -- */
             
             let dateAndprocess_obj = [];

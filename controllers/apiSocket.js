@@ -523,7 +523,7 @@ module.exports = function(io){
                             return out_qty().then(function(outs_results){
                                 function cleaning4ScrapDPPM(){ // cleaning result object
                                     return new Promise(function(resolve, reject){
-                                        if(typeof scrap_results != 'undefined' || scrap_results != null || typeof outs_results[0] != 'undefined' || outs_results[0] != null){
+                                        if(typeof scrap_results != 'undefined' || scrap_results != null || typeof outs_results != 'undefined' || outs_results != null){
 
                                             let scrap_details = [];
                                             let xBarDPPM = [];
@@ -649,6 +649,8 @@ module.exports = function(io){
                     }
                     
                     is_shift_AMorPM().then(function(AMorPM){
+
+                        /** OEE per tol functions */
                         function out_qty_per_tool(){ // function query for outs PER TOOL
                             return new Promise(function(resolve, reject){ 
 
@@ -711,7 +713,7 @@ module.exports = function(io){
                                 });
 
                                 connection.query({
-                                    sql: 'SELECT * FROM fab4_lookup.fab4_tool_uph WHERE fab_week = "1802" AND process = ?',
+                                    sql: 'SELECT * FROM fab4_lookup.fab4_tool_uph WHERE fab_week = "1802" AND proc_id = ? ORDER BY eq_alias',
                                     values: [process]
                                 },  function(err, results, fields){
                                         //console.log(results);
@@ -769,26 +771,123 @@ module.exports = function(io){
                                 
                             });
                         }
+                        /** -- OEE per tool functions -- */
 
+
+                        /** Status per tool functions */
+                        function status_per_tool(){
+                            return new Promise(function(resolve, reject){
+                                 
+                            });
+                        }
+                        /** -- Status per tool functions --  */
 
                         out_qty_per_tool().then(function(outs_per_tool_results){
                             return uph_per_tool().then(function(uph_per_tool_results){
                                 return fab_hour().then(function(fab_hour_results){
-                                    let uph_per_tool_obj = [];
 
-                                    for(let i=0; i<uph_per_tool_results.length;i++){
-                                        uph_per_tool_obj.push({
-                                            tool_name: uph_per_tool_results[i].eq_name,
-                                            tool_uph: uph_per_tool_results[i].uph,
-                                            target_oee: uph_per_tool_results[i].target_oee
+                                    console.log(outs_per_tool_results);
+
+                                    let outs_per_tool_obj = [];
+                                    let uph_per_tool_obj = [];
+                                    let fab_hour_obj = [];
+
+                                    let oee_value_per_tool_obj = [];
+
+                                    let xOEELine = [];
+                                    let yOEELine = [];
+
+                                    let xOEEtarget = [];
+                                    let yOEEtarget = [];
+
+                                    let oeeTrace_obj = [];
+                                    let oeeTrace_target_obj =[];
+
+                                    // cleaning outs per tool results 
+                                    for(let i=0; i<outs_per_tool_results.length;i++){
+                                        outs_per_tool_obj.push({
+                                            tool_name: outs_per_tool_results[i].eq_name,
+                                            out_qty: outs_per_tool_results[i].out_qty
                                         });
                                     }
 
-                                    socket.emit('oee', uph_per_tool_obj);
+                                    // cleaning uph per tool results
+                                    for(let i=0; i<uph_per_tool_results.length;i++){
+                                        uph_per_tool_obj.push({
+                                            eq_alias: uph_per_tool_results[i].eq_alias,
+                                            tool_name: uph_per_tool_results[i].eq_name,
+                                            tool_uph: uph_per_tool_results[i].uph,
+                                            target_oee: (uph_per_tool_results[i].target_oee * 100).toFixed(0)
+                                        });
+                                    }
 
-                                    console.log(outs_per_tool_results);
-                                    console.log(uph_per_tool_obj);
-                                    console.log(fab_hour_results);
+                                    // cleaning fab hour results 
+                                    fab_hour_obj.push({
+                                        hour: fab_hour_results[0].fab_hour
+                                    });
+                                
+                                    // compute oee
+                                    for(let i=0;i<outs_per_tool_obj.length; i++){
+
+                                        if(uph_per_tool_obj[i].tool_name){
+                                            oee_value_per_tool_obj.push({
+                                                tool: uph_per_tool_obj[i].eq_alias,
+                                                oee: ((outs_per_tool_obj[i].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0)
+                                            });
+                                        }
+                                        
+                                    }
+
+                                    // feed the xy coord
+                                    for(let i=0;i<oee_value_per_tool_obj.length;i++){
+
+                                        xOEELine.push(
+                                            oee_value_per_tool_obj[i].tool
+                                        );
+
+                                        yOEELine.push(
+                                            oee_value_per_tool_obj[i].oee
+                                        );
+
+                                        xOEEtarget.push(
+                                            oee_value_per_tool_obj[i].tool
+                                        );
+
+                                        yOEEtarget.push(
+                                            uph_per_tool_obj[i].target_oee
+                                        )
+
+                                    }
+
+                                    // combine to make a plotly data
+
+                                    oeeTrace_obj.push({
+                                        x: xOEELine,
+                                        y: yOEELine,
+                                        type: 'scatter',
+                                        name: 'OEE',
+                                        line: {
+                                            width: '1.5'
+                                        }
+                                    });
+
+                                    oeeTrace_target_obj.push({
+                                        x: xOEEtarget,
+                                        y: yOEEtarget,
+                                        type: 'scatter',
+                                        mode: 'lines',
+                                        name: 'target',
+                                        line : {
+                                            width: '0.5',
+                                            color: 'rgb(255, 0, 0)',
+                                        }
+                                    });
+
+                                    let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0]];
+
+                                    console.log(OEE_Trace);
+
+                                    socket.emit('oee', OEE_Trace);
                                     connection.release(); // release woo.
                                 });
                                 
