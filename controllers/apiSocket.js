@@ -797,7 +797,7 @@ module.exports = function(io){
                                         resolve(status_results);
                                     });
 
-                                } else if(AMorPM == "PREPM" || AMorPM == "POSTPM"){
+                                } else if(AMorPM == "PREPM"){
 
                                     connection.query({
                                         sql: 'SELECT pretty_table.eq_name, COALESCE(P,0) AS P,  COALESCE(SU,0) AS SU,   COALESCE(SD,0) AS SD,  COALESCE(D,0) AS D,  COALESCE(E,0) AS E, COALESCE(SB,0) AS SB  FROM (SELECT extended_table.eq_name,   SUM(P) AS P,    SUM(SU) AS SU,   SUM(SD) AS SD,    SUM(D) AS D,    SUM(E) AS E,  SUM(SB) AS SB FROM  (SELECT base_table.*,   CASE WHEN base_table.stat_id = "P" THEN base_table.duration END AS P,   CASE WHEN base_table.stat_id = "SU" THEN base_table.duration END AS SU,   CASE WHEN base_table.stat_id = "SD" THEN base_table.duration END AS SD,   CASE WHEN base_table.stat_id = "D" THEN base_table.duration END AS D,  CASE WHEN base_table.stat_id = "E" THEN base_table.duration END AS E,   CASE WHEN base_table.stat_id = "SB" THEN base_table.duration END AS SB  FROM (SELECT G.eq_name,  G.stat_id,  SUM(ROUND(TIME_TO_SEC(TIMEDIFF(G.time_out,G.time_in))/3600,2)) as duration FROM  (SELECT  C.eq_name,    B.stat_id,    IF(B.time_in <= CONCAT(?," 18:30:00") && B.time_out >= CONCAT(?," 18:30:00"),CONCAT(?," 18:30:00"),IF(B.time_in <= CONCAT(?, " 18:30:00"),CONCAT(?," 18:30:00"),IF(B.time_in >= CONCAT(? + INTERVAL 1 DAY, " 18:30:00"),CONCAT(? + INTERVAL 1 DAY," 18:30:00"),B.time_in))) AS time_in ,    IF(B.time_in <= CONCAT(? + INTERVAL 1 DAY," 18:30:00") && B.time_out >= CONCAT(? + INTERVAL 1 DAY, " 18:30:00"),CONCAT(? + INTERVAL 1 DAY, " 18:30:00"),IF(B.time_out <= CONCAT(? , " 18:30:00"),CONCAT(?," 18:30:00"),IF(B.time_out >= CONCAT(? + INTERVAL 1 DAY, " 18:30:00"),CONCAT(? + INTERVAL 1 DAY," 18:30:00"),IF(B.time_out IS NULL && B.time_in < CONCAT(? + INTERVAL 1 DAY," 18:30:00") ,CONVERT_TZ(NOW(),@@SESSION.TIME_ZONE,"+08:00"),B.time_out)))) AS time_out   FROM  (SELECT eq_id, proc_id    FROM MES_EQ_PROCESS    WHERE proc_id = ? GROUP BY eq_id) A   JOIN      MES_EQ_CSTAT_HEAD B    ON A.eq_id = B.eq_id   JOIN     MES_EQ_INFO C   ON A.eq_id = C.eq_id    WHERE    B.time_in >= CONCAT(? - INTERVAL 1 DAY," 00:00:00")   AND A.proc_id = ?) G GROUP BY G.eq_name, G.stat_id) base_table) extended_table  GROUP BY extended_table.eq_name) pretty_table  ',
@@ -809,6 +809,18 @@ module.exports = function(io){
                                         resolve(status_results);
                                     });
 
+
+                                } else if ( AMorPM == "POSTPM" ){
+
+                                    connection.query({
+                                        sql: 'SELECT pretty_table.eq_name, COALESCE(P,0) AS P,  COALESCE(SU,0) AS SU,   COALESCE(SD,0) AS SD,  COALESCE(D,0) AS D,  COALESCE(E,0) AS E, COALESCE(SB,0) AS SB  FROM (SELECT extended_table.eq_name,   SUM(P) AS P,    SUM(SU) AS SU,   SUM(SD) AS SD,    SUM(D) AS D,    SUM(E) AS E,  SUM(SB) AS SB FROM  (SELECT base_table.*,   CASE WHEN base_table.stat_id = "P" THEN base_table.duration END AS P,   CASE WHEN base_table.stat_id = "SU" THEN base_table.duration END AS SU,   CASE WHEN base_table.stat_id = "SD" THEN base_table.duration END AS SD,   CASE WHEN base_table.stat_id = "D" THEN base_table.duration END AS D,  CASE WHEN base_table.stat_id = "E" THEN base_table.duration END AS E,   CASE WHEN base_table.stat_id = "SB" THEN base_table.duration END AS SB  FROM (SELECT G.eq_name,  G.stat_id,  SUM(ROUND(TIME_TO_SEC(TIMEDIFF(G.time_out,G.time_in))/3600,2)) as duration FROM  (SELECT  C.eq_name,    B.stat_id,    IF(B.time_in <= CONCAT(?  + INTERVAL -1 DAY," 18:30:00") && B.time_out >= CONCAT(?  + INTERVAL -1 DAY," 18:30:00"),CONCAT(?  + INTERVAL -1 DAY," 18:30:00"),IF(B.time_in <= CONCAT(?  + INTERVAL -1 DAY, " 18:30:00"),CONCAT(?  + INTERVAL -1 DAY," 18:30:00"),IF(B.time_in >= CONCAT(? + INTERVAL 0 DAY, " 18:30:00"),CONCAT(? + INTERVAL 0 DAY," 18:30:00"),B.time_in))) AS time_in ,    IF(B.time_in <= CONCAT(? + INTERVAL 0 DAY," 18:30:00") && B.time_out >= CONCAT(? + INTERVAL 0 DAY, " 18:30:00"),CONCAT(? + INTERVAL 0 DAY, " 18:30:00"),IF(B.time_out <= CONCAT(?  + INTERVAL -1 DAY, " 18:30:00"),CONCAT(?  + INTERVAL -1 DAY," 18:30:00"),IF(B.time_out >= CONCAT(? + INTERVAL 0 DAY, " 18:30:00"),CONCAT(? + INTERVAL 0 DAY," 18:30:00"),IF(B.time_out IS NULL && B.time_in < CONCAT(? + INTERVAL 0 DAY," 18:30:00") ,CONVERT_TZ(NOW(),@@SESSION.TIME_ZONE,"+08:00"),B.time_out)))) AS time_out   FROM  (SELECT eq_id, proc_id    FROM MES_EQ_PROCESS    WHERE proc_id = ? GROUP BY eq_id) A   JOIN      MES_EQ_CSTAT_HEAD B    ON A.eq_id = B.eq_id   JOIN     MES_EQ_INFO C   ON A.eq_id = C.eq_id    WHERE    B.time_in >= CONCAT(? - INTERVAL 2 DAY," 00:00:00")   AND A.proc_id = ?) G GROUP BY G.eq_name, G.stat_id) base_table) extended_table  GROUP BY extended_table.eq_name) pretty_table  ',
+                                        values: [datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, datetime, process, datetime, process]
+                
+                                    },  function(err, results, fields){
+                                        //console.log(results);
+                                       let status_results = results;
+                                        resolve(status_results);
+                                    });
 
                                 }
 
@@ -823,7 +835,7 @@ module.exports = function(io){
                                     return status_per_tool().then(function(status_results){
 
                                         // console.log(outs_per_tool_results);
-                                        //console.log(status_results);
+                                         console.log(status_results);
 
                                         let outs_per_tool_obj = [];
                                         let uph_per_tool_obj = [];
@@ -878,6 +890,7 @@ module.exports = function(io){
                                         });
 
                                         // cleaning status per tool results
+                                        /*
                                         for(let i=0; i<status_results.length;i++){
                                             status_obj.push({
                                                 tool: status_results[i].eq_name,
@@ -889,6 +902,7 @@ module.exports = function(io){
                                                 SB: status_results[i].SB 
                                             });
                                         }
+                                        */
                                     
                                         // compute oee
                                         for(let i=0;i<outs_per_tool_obj.length; i++){
@@ -923,6 +937,7 @@ module.exports = function(io){
 
                                         }
 
+                                        /*
                                         // feed the xy coord BAR
                                         for(let i=0;i<status_obj.length;i++){
 
@@ -959,6 +974,7 @@ module.exports = function(io){
                                             );
 
                                         }
+                                        */
 
                                         // combine to make a plotly data
 
@@ -984,6 +1000,7 @@ module.exports = function(io){
                                             }
                                         });
 
+                                        /*
                                         oeeTrace_status.push(
                                             {
                                                 x: xStatusBar,
@@ -1022,8 +1039,9 @@ module.exports = function(io){
                                                 type: 'bar'
                                             },
                                         );
+                                        */
 
-                                        let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0], oeeTrace_status[0], oeeTrace_status[1], oeeTrace_status[2], oeeTrace_status[3], oeeTrace_status[4], oeeTrace_status[5]];
+                                        let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0]];
 
                                         //console.log(OEE_Trace);
 
