@@ -664,8 +664,8 @@ module.exports = function(io){
                                 if(AMorPM == 'AM'){
                                     
                                     connection.query({
-                                        sql: 'SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE))   AND A.process_id = ?  GROUP BY B.eq_name',
-                                        values: [datetime, process]
+                                        sql: 'SELECT all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_name) AS all_eq_name LEFT JOIN (SELECT eq_id, COALESCE(SUM(out_qty),0) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id',
+                                        values: [process, datetime, process]
                 
                                     },  function(err, results, fields){
                                         //console.log(results);
@@ -676,7 +676,7 @@ module.exports = function(io){
                                 } else if(AMorPM == 'PREPM'){
 
                                     connection.query({
-                                        sql: 'SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE))   AND A.process_id = ?  GROUP BY B.eq_name',
+                                        sql: 'SELECT all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_name) AS all_eq_name LEFT JOIN (SELECT eq_id, COALESCE(SUM(out_qty),0) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id',
                                         values: [datetime, process]
                 
                                     },  function(err, results, fields){
@@ -688,7 +688,7 @@ module.exports = function(io){
                                 } else if(AMorPM == 'POSTPM'){
 
                                     connection.query({
-                                        sql: 'SELECT B.eq_name, SUM(A.out_qty) AS out_qty     FROM MES_OUT_DETAILS A     JOIN MES_EQ_INFO B   ON A.eq_id = B.eq_id    WHERE DATE(DATE_ADD(A.date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY))   AND A.process_id = ?  GROUP BY B.eq_name ',
+                                        sql: 'SELECT all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_name) AS all_eq_name LEFT JOIN (SELECT eq_id, COALESCE(SUM(out_qty),0) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 day)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id',
                                         values: [datetime, process]
                 
                                     },  function(err, results, fields){
@@ -835,7 +835,7 @@ module.exports = function(io){
                                     return status_per_tool().then(function(status_results){
 
                                         // console.log(outs_per_tool_results);
-                                         console.log(status_results);
+                                        // console.log(status_results);
 
                                         let outs_per_tool_obj = [];
                                         let uph_per_tool_obj = [];
@@ -890,7 +890,7 @@ module.exports = function(io){
                                         });
 
                                         // cleaning status per tool results
-                                        /*
+                                        
                                         for(let i=0; i<status_results.length;i++){
                                             status_obj.push({
                                                 tool: status_results[i].eq_name,
@@ -902,10 +902,11 @@ module.exports = function(io){
                                                 SB: status_results[i].SB 
                                             });
                                         }
-                                        */
-                                    
+                                        
+                                        //console.log(status_obj);
                                         // compute oee
-                                        for(let i=0;i<outs_per_tool_obj.length; i++){
+
+                                        for(let i=0;i<outs_per_tool_obj.length; i++){ // question, what if tool doesn't have outs, toolname will not be reflected
 
                                             if(uph_per_tool_obj[i].tool_name){
                                                 oee_value_per_tool_obj.push({
