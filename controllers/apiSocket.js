@@ -930,8 +930,8 @@ module.exports = function(io){
                                                 target_oee: (uph_per_tool_results[i].target_oee * 100).toFixed(0)
                                             });
                                         }
-                                        console.log(uph_per_tool_obj);
-                                        console.log(outs_per_tool_obj);
+                                       // console.log(uph_per_tool_obj);
+                                       // console.log(outs_per_tool_obj);
 
                                         // cleaning fab hour results 
                                         fab_hour_obj.push({
@@ -994,44 +994,57 @@ module.exports = function(io){
 
                                         }
 
-                                        
+                                        console.log(status_obj);
+
                                         // feed the xy coord BAR
-                                        for(let i=0;i<status_obj.length;i++){
+                                        
+                                            
+                                        for(let j=0;j<uph_per_tool_obj.length;j++){
 
-                                            if(status_obj[i].tool == uph_per_tool_obj[i].tool_name){
+                                            xStatusBar.push(
+                                                uph_per_tool_obj[j].eq_alias
+                                            );
+    
+                                        }
+
+                                        for(let h=0; h<uph_per_tool_obj.length;h++){
+
+                                            for(let i=0;i<status_obj.length;i++){
                                                 
-                                                xStatusBar.push(
-                                                    uph_per_tool_obj[i].eq_alias
-                                                );
+                                                if(uph_per_tool_obj[h].tool_name == status_obj[i].tool){
 
+                                                    yStatusBar_P.push(
+                                                        status_obj[i].P
+                                                    );
+        
+                                                    yStatusBar_SU.push(
+                                                        status_obj[i].SU
+                                                    );
+        
+                                                    yStatusBar_SD.push(
+                                                        status_obj[i].SD
+                                                    );
+        
+                                                    yStatusBar_D.push(
+                                                        status_obj[i].D
+                                                    );
+        
+                                                    yStatusBar_E.push(
+                                                        status_obj[i].E
+                                                    );
+        
+                                                    yStatusBar_SB.push(
+                                                        status_obj[i].SB
+                                                    );
+
+                                                }
+                                                
+                                            
                                             }
 
-                                            yStatusBar_P.push(
-                                                status_obj[i].P
-                                            );
-
-                                            yStatusBar_SU.push(
-                                                status_obj[i].SU
-                                            );
-
-                                            yStatusBar_SD.push(
-                                                status_obj[i].SD
-                                            );
-
-                                            yStatusBar_D.push(
-                                                status_obj[i].D
-                                            );
-
-                                            yStatusBar_E.push(
-                                                status_obj[i].E
-                                            );
-
-                                            yStatusBar_SB.push(
-                                                status_obj[i].SB
-                                            );
-
                                         }
-                                        
+                                            
+                                        //console.log(yStatusBar_P);
 
                                         // combine to make a plotly data
 
