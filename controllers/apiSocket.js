@@ -940,15 +940,15 @@ module.exports = function(io){
 
                                         // cleaning status per tool results
                                         
-                                        for(let i=0; i<status_results.length;i++){
+                                        for(let i=0; i<status_results.length;i++){ // per shift
                                             status_obj.push({
                                                 tool: status_results[i].eq_name,
-                                                P: status_results[i].P ,
-                                                SU: status_results[i].SU ,
-                                                SD: status_results[i].SD ,
-                                                D: status_results[i].D ,
-                                                E: status_results[i].E ,
-                                                SB: status_results[i].SB 
+                                                P: ((status_results[i].P/12) * 100).toFixed(2) ,
+                                                SU: ((status_results[i].SU/12) * 100).toFixed(2),
+                                                SD: ((status_results[i].SD/12) * 100).toFixed(2) ,
+                                                D: ((status_results[i].D/12) * 100).toFixed(2) ,
+                                                E: ((status_results[i].E/12) * 100).toFixed(2) ,
+                                                SB: ((status_results[i].SB/12) * 100).toFixed(2) 
                                             });
                                         }
                                         
@@ -961,7 +961,8 @@ module.exports = function(io){
                                                     
                                                     oee_value_per_tool_obj.push({
                                                         tool: uph_per_tool_obj[i].eq_alias,
-                                                        oee: ((outs_per_tool_obj[j].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0)
+                                                        //oee: ((outs_per_tool_obj[j].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0)
+                                                        oee: ((outs_per_tool_obj[j].out_qty / uph_per_tool_obj[i].tool_uph / 12) * 100).toFixed(0)
 
                                                     });
                                                 }
@@ -970,7 +971,7 @@ module.exports = function(io){
                                         }
 
                                         
-                                        console.log(uph_per_tool_obj);
+                                        //console.log(uph_per_tool_obj);
 
                                         // feed the xy coord LINE
                                         for(let i=0;i<oee_value_per_tool_obj.length;i++){
@@ -993,7 +994,7 @@ module.exports = function(io){
 
                                         }
 
-                                        /*
+                                        
                                         // feed the xy coord BAR
                                         for(let i=0;i<status_obj.length;i++){
 
@@ -1030,7 +1031,7 @@ module.exports = function(io){
                                             );
 
                                         }
-                                        */
+                                        
 
                                         // combine to make a plotly data
 
@@ -1040,7 +1041,8 @@ module.exports = function(io){
                                             type: 'scatter',
                                             name: 'OEE',
                                             line: {
-                                                width: '1.5'
+                                                width: '1.5',
+                                                color: 'rgb(0, 0, 0)'
                                             }
                                         });
 
@@ -1056,48 +1058,54 @@ module.exports = function(io){
                                             }
                                         });
 
-                                        /*
+                                        
                                         oeeTrace_status.push(
                                             {
                                                 x: xStatusBar,
                                                 y: yStatusBar_P,
                                                 name: 'Production',
-                                                type: 'bar'
+                                                type: 'bar',
+                                                marker: {color: 'rgb(102, 204, 0)'}, 
                                             },
                                             {
                                                 x: xStatusBar,
                                                 y: yStatusBar_SU,
                                                 name: 'Setup',
-                                                type: 'bar'
+                                                type: 'bar',
+                                                marker: {color: 'rgb(255, 153, 51)'}, 
                                             },
                                             {
                                                 x: xStatusBar,
                                                 y: yStatusBar_SD,
                                                 name: 'Scheduled DT',
-                                                type: 'bar'
+                                                type: 'bar',
+                                                marker: {color: 'rgb(255, 51, 51)'}, 
                                             },
                                             {
                                                 x: xStatusBar,
                                                 y: yStatusBar_D,
                                                 name: 'Unscheduled DT',
-                                                type: 'bar'
+                                                type: 'bar',
+                                                marker: {color: 'rgb(0, 0, 102)'}, 
                                             },
                                             {
                                                 x: xStatusBar,
                                                 y: yStatusBar_E,
                                                 name: 'Engineering',
-                                                type: 'bar'
+                                                type: 'bar',
+                                                marker: {color: 'rgb(51, 51, 255)'}, 
                                             },
                                             {
                                                 x: xStatusBar,
                                                 y: yStatusBar_SB,
                                                 name: 'Stand-by',
-                                                type: 'bar'
+                                                type: 'bar',
+                                                marker: {color: 'rgb(255, 255, 0)'}, 
                                             },
                                         );
-                                        */
+                                        
 
-                                        let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0]];
+                                        let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0], oeeTrace_status[0], oeeTrace_status[1], oeeTrace_status[2], oeeTrace_status[3], oeeTrace_status[4], oeeTrace_status[5]];
 
                                         //console.log(OEE_Trace);
 
