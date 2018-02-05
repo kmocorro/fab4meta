@@ -663,39 +663,85 @@ module.exports = function(io){
 
                                 if(AMorPM == 'AM'){
                                     
-                                    connection.query({
-                                        sql: 'SELECT all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_name) AS all_eq_name LEFT JOIN (SELECT eq_id, COALESCE(SUM(out_qty),0) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id',
-                                        values: [process, datetime, process]
-                
-                                    },  function(err, results, fields){
-                                        //console.log(results);
-                                       let outs_per_tool_results = results;
-                                        resolve(outs_per_tool_results);
-                                    });
+                                    if(process == "bsgdep"){ // THIS IS FOR THE AMAZING DOUBLE ENTRY eq_id = 328, 439. FIX THIS AND I'LL REMOVE THIS
+
+                                        connection.query({
+                                            sql: 'SELECT eq_outs.eq_id, all_eq_name.eq_id, all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_id) AS all_eq_name  JOIN (SELECT eq_id, SUM(out_qty) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id ORDER BY all_eq_name.eq_name',
+                                            values: [process, datetime, process]
+                    
+                                        },  function(err, results, fields){
+                                            //console.log(results);
+                                           let outs_per_tool_results = results;
+                                            resolve(outs_per_tool_results);
+                                        });
+
+                                    } else {
+
+                                        connection.query({
+                                            sql: 'SELECT all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_name) AS all_eq_name LEFT JOIN (SELECT eq_id, COALESCE(SUM(out_qty),0) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id',
+                                            values: [process, datetime, process]
+                    
+                                        },  function(err, results, fields){
+                                            //console.log(results);
+                                           let outs_per_tool_results = results;
+                                            resolve(outs_per_tool_results);
+                                        });
+                                    }
+                                    
 
                                 } else if(AMorPM == 'PREPM'){
 
-                                    connection.query({
-                                        sql: 'SELECT all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_name) AS all_eq_name LEFT JOIN (SELECT eq_id, COALESCE(SUM(out_qty),0) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id',
-                                        values: [datetime, process]
-                
-                                    },  function(err, results, fields){
-                                        //console.log(results);
-                                       let outs_per_tool_results = results;
-                                        resolve(outs_per_tool_results);
-                                    });
+                                    if(process == "bsgdep"){ // THIS IS FOR THE AMAZING DOUBLE ENTRY eq_id = 328, 439. FIX THIS AND I'LL REMOVE THIS
+
+                                        connection.query({
+                                            sql: 'SELECT eq_outs.eq_id, all_eq_name.eq_id, all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_id) AS all_eq_name  JOIN (SELECT eq_id, SUM(out_qty) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id ORDER BY all_eq_name.eq_name',
+                                            values: [process, datetime, process]
+                    
+                                        },  function(err, results, fields){
+                                            //console.log(results);
+                                           let outs_per_tool_results = results;
+                                            resolve(outs_per_tool_results);
+                                        });
+
+                                    } else {
+
+                                        connection.query({
+                                            sql: 'SELECT all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_name) AS all_eq_name LEFT JOIN (SELECT eq_id, COALESCE(SUM(out_qty),0) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id',
+                                            values: [process, datetime, process]
+                    
+                                        },  function(err, results, fields){
+                                            //console.log(results);
+                                           let outs_per_tool_results = results;
+                                            resolve(outs_per_tool_results);
+                                        });
+                                    }
 
                                 } else if(AMorPM == 'POSTPM'){
 
-                                    connection.query({
-                                        sql: 'SELECT all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_name) AS all_eq_name LEFT JOIN (SELECT eq_id, COALESCE(SUM(out_qty),0) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 day)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id',
-                                        values: [datetime, process]
-                
-                                    },  function(err, results, fields){
-                                        //console.log(results);
-                                       let outs_per_tool_results = results;
-                                        resolve(outs_per_tool_results);
-                                    });
+                                    if(process == "bsgdep"){ // THIS IS FOR THE AMAZING DOUBLE ENTRY eq_id = 328, 439. FIX THIS AND I'LL REMOVE THIS
+
+                                        connection.query({
+                                            sql: 'SELECT eq_outs.eq_id, all_eq_name.eq_id, all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_id) AS all_eq_name  JOIN (SELECT eq_id, SUM(out_qty) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id ORDER BY all_eq_name.eq_name',
+                                            values: [process, datetime, process]
+                    
+                                        },  function(err, results, fields){
+                                            //console.log(results);
+                                           let outs_per_tool_results = results;
+                                            resolve(outs_per_tool_results);
+                                        });
+
+                                    } else {
+
+                                        connection.query({
+                                            sql: 'SELECT all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_name) AS all_eq_name LEFT JOIN (SELECT eq_id, COALESCE(SUM(out_qty),0) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id',
+                                            values: [process, datetime, process]
+                    
+                                        },  function(err, results, fields){
+                                            //console.log(results);
+                                           let outs_per_tool_results = results;
+                                            resolve(outs_per_tool_results);
+                                        });
+                                    }
 
                                 }
 
@@ -874,6 +920,7 @@ module.exports = function(io){
                                             });
                                         }
 
+                                        
                                         // cleaning uph per tool results
                                         for(let i=0; i<uph_per_tool_results.length;i++){
                                             uph_per_tool_obj.push({
@@ -883,6 +930,8 @@ module.exports = function(io){
                                                 target_oee: (uph_per_tool_results[i].target_oee * 100).toFixed(0)
                                             });
                                         }
+                                        console.log(uph_per_tool_obj);
+                                        console.log(outs_per_tool_obj);
 
                                         // cleaning fab hour results 
                                         fab_hour_obj.push({
@@ -906,14 +955,12 @@ module.exports = function(io){
                                         //console.log(status_obj);
                                         // compute oee
 
-                                        for(let i=0;i<outs_per_tool_obj.length; i++){ // question, what if tool doesn't have outs, toolname will not be reflected
+                                        for(let i=0;i<uph_per_tool_obj.length; i++){ // question, what if tool doesn't have outs, toolname will not be reflected | answer: query result should have complete eq
 
-                                            if(uph_per_tool_obj[i].tool_name){
-                                                oee_value_per_tool_obj.push({
-                                                    tool: uph_per_tool_obj[i].eq_alias,
-                                                    oee: ((outs_per_tool_obj[i].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0)
-                                                });
-                                            }
+                                            oee_value_per_tool_obj.push({
+                                                tool: uph_per_tool_obj[i].eq_alias,
+                                                oee: ((outs_per_tool_obj[i].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0)
+                                            });
                                             
                                         }
 
