@@ -952,17 +952,25 @@ module.exports = function(io){
                                             });
                                         }
                                         
-                                        //console.log(status_obj);
                                         // compute oee
 
                                         for(let i=0;i<uph_per_tool_obj.length; i++){ // question, what if tool doesn't have outs, toolname will not be reflected | answer: query result should have complete eq
 
-                                            oee_value_per_tool_obj.push({
-                                                tool: uph_per_tool_obj[i].eq_alias,
-                                                oee: ((outs_per_tool_obj[i].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0)
-                                            });
+                                            for(let j=0; j<outs_per_tool_obj.length; j++){
+                                                if(uph_per_tool_obj[i].tool_name == outs_per_tool_obj[j].tool_name){
+                                                    
+                                                    oee_value_per_tool_obj.push({
+                                                        tool: uph_per_tool_obj[i].eq_alias,
+                                                        oee: ((outs_per_tool_obj[j].out_qty / uph_per_tool_obj[i].tool_uph / fab_hour_obj[0].hour) * 100).toFixed(0)
+
+                                                    });
+                                                }
+                                            }
                                             
                                         }
+
+                                        
+                                        console.log(uph_per_tool_obj);
 
                                         // feed the xy coord LINE
                                         for(let i=0;i<oee_value_per_tool_obj.length;i++){
