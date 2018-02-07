@@ -880,9 +880,6 @@ module.exports = function(io){
                                 return fab_hour().then(function(fab_hour_results){
                                     return status_per_tool().then(function(status_results){
 
-                                        // console.log(outs_per_tool_results);
-                                        // console.log(status_results);
-
                                         let outs_per_tool_obj = [];
                                         let uph_per_tool_obj = [];
                                         let fab_hour_obj = [];
@@ -903,8 +900,6 @@ module.exports = function(io){
                                         let yStatusBar_D = [];
                                         let yStatusBar_E = [];
                                         let yStatusBar_SB = [];
-                                        let nameStatusBar = [];
-                                        let statusArr = [];
 
 
                                         let oeeTrace_obj = [];
@@ -930,11 +925,9 @@ module.exports = function(io){
                                                 target_oee: uph_per_tool_results[i].target_oee
                                             });
                                         }
-                                       // console.log(uph_per_tool_obj);
-                                       // console.log(outs_per_tool_obj);
 
                                         // cleaning fab hour results 
-                                        if(typeof fab_hour_results[0] != 'undefined' && fab_hour_results[0] != null && fab_hour_results.length > 0){
+                                        if(typeof fab_hour_results[0] != 'undefined' && fab_hour_results[0] != null && fab_hour_results.length > 0){ // prevent fab_hour error undefined
                                             fab_hour_obj.push({
                                                 hour: fab_hour_results[0].fab_hour
                                             });
@@ -946,7 +939,6 @@ module.exports = function(io){
                                         
 
                                         // cleaning status per tool results
-                                        
                                         for(let i=0; i<status_results.length;i++){ // per shift
                                             status_obj.push({
                                                 tool: status_results[i].eq_name,
@@ -959,8 +951,7 @@ module.exports = function(io){
                                             });
                                         }
                                         
-                                        // compute oee
-
+                                        // ** compute oee ** //
                                         for(let i=0;i<uph_per_tool_obj.length; i++){ // question, what if tool doesn't have outs, toolname will not be reflected | answer: query result should have complete eq
 
                                             for(let j=0; j<outs_per_tool_obj.length; j++){
@@ -979,9 +970,7 @@ module.exports = function(io){
 
                                         
                                         //console.log(status_results);
-
-                                        // feed the xy coord LINE
-                                        for(let i=0;i<oee_value_per_tool_obj.length;i++){
+                                        for(let i=0;i<oee_value_per_tool_obj.length;i++){ // feed the xy coord LINE
 
                                             xOEELine.push(
                                                 oee_value_per_tool_obj[i].tool
@@ -1003,25 +992,13 @@ module.exports = function(io){
 
                                         //console.log(uph_per_tool_obj);
 
-                                        // feed the xy coord BAR
-                                        
-                                        /*   
-                                        for(let j=0;j<uph_per_tool_obj.length;j++){
-
-                                            xStatusBar.push(
-                                                uph_per_tool_obj[j].eq_alias
-                                            );
-    
-                                        }
-                                        */
-
-                                        for(let h=0; h<uph_per_tool_obj.length;h++){
+                                        for(let h=0; h<uph_per_tool_obj.length;h++){  // feed the x coord BAR
 
                                             xStatusBar.push(
                                                 uph_per_tool_obj[h].eq_alias
                                             );
 
-                                            for(let i=0;i<status_obj.length;i++){
+                                            for(let i=0;i<status_obj.length;i++){ // feed the y coord BAR
                                                 
                                                 if(uph_per_tool_obj[h].tool_name == status_obj[i].tool){
 
@@ -1056,11 +1033,8 @@ module.exports = function(io){
 
                                         }
                                             
-                                        //console.log(yStatusBar_P);
-
-                                        // combine to make a plotly data
-
-                                        oeeTrace_obj.push({
+                                        // ** combine to make a plotly data ** //
+                                        oeeTrace_obj.push({ // oee line
                                             x: xOEELine,
                                             y: yOEELine,
                                             type: 'scatter',
@@ -1071,7 +1045,7 @@ module.exports = function(io){
                                             }
                                         });
 
-                                        oeeTrace_target_obj.push({
+                                        oeeTrace_target_obj.push({ // oee target line
                                             x: xOEEtarget,
                                             y: yOEEtarget,
                                             type: 'scatter',
@@ -1084,7 +1058,7 @@ module.exports = function(io){
                                         });
 
                                         
-                                        oeeTrace_status.push(
+                                        oeeTrace_status.push( // oee status
                                             {
                                                 x: xStatusBar,
                                                 y: yStatusBar_P,
@@ -1133,7 +1107,6 @@ module.exports = function(io){
                                         let OEE_Trace = [oeeTrace_obj[0], oeeTrace_target_obj[0], oeeTrace_status[0], oeeTrace_status[1], oeeTrace_status[2], oeeTrace_status[3], oeeTrace_status[4], oeeTrace_status[5]];
 
                                         //console.log(OEE_Trace);
-
                                         socket.emit('oee', OEE_Trace);
                                         connection.release(); // release woo.
 
