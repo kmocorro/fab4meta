@@ -2,5 +2,6 @@
 node_modules/
 public/AdminLTE-2.4.2
 public/dist
+public/logs
 .vscode
 

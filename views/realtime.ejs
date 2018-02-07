@@ -99,7 +99,9 @@
             </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="#"><i class="fa fa-circle-o"></i> (loop process list here)</a></li>
+              <% process_list.forEach(function(process) { %>
+                <li><a href="/<%= process.process %>"><i class="fa fa-circle-o"></i> <%= process.process %></a></li>
+              <% }); %>
           </ul>
         </li>
         <li class="treeview">
@@ -154,6 +156,7 @@
 
     <!-- Main Body -->
     <section class="content">
+
         <!-- Main row -->
         <div class="row">
             <section class="col-lg-6">
@@ -453,8 +456,9 @@
                     title: ('<%= process %>').toUpperCase() + ' Linearity'
                 };
 
-            Plotly.newPlot('linearity-chart', dataLinear, layout, {displayModeBar: false});
-            Plotly.update('linearity-chart', dataLinear, layout );
+            Plotly.newPlot('linearity-chart', dataLinear, layout, {displayModeBar: false})
+              .then(Plotly.update('linearity-chart', dataLinear, layout ));
+            
             /** -- Linearity Chart -- */
 
             let dateAndprocess_obj = [];
@@ -536,6 +540,10 @@
                     pad: 4
                 },
                 barmode: 'stack',
+                yaxis: {
+                  title: 'percentage (%)',
+                  range: [0, 105.023]
+                }
             }
             Plotly.newPlot('oee-chart', dataLineOEE, layout, {displayModeBar: false});
             Plotly.update('oee-chart', dataLineOEE, layout );

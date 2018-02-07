@@ -99,7 +99,9 @@
             </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="#"><i class="fa fa-circle-o"></i> (loop process list here)</a></li>
+              <% process_list.forEach(function(process) { %>
+                <li><a href="/<%= process.process %>"><i class="fa fa-circle-o"></i> <%= process.process %></a></li>
+              <% }); %>
           </ul>
         </li>
         <li class="treeview">
