@@ -663,7 +663,7 @@ module.exports = function(io){
 
                                 if(AMorPM == 'AM'){
                                     
-                                    if(process == "bsgdep"){ // THIS IS FOR THE AMAZING DOUBLE ENTRY eq_id = 328, 439. FIX THIS AND I'LL REMOVE THIS
+                                    if(process == "BSGDEP"){ // THIS IS FOR THE AMAZING DOUBLE ENTRY eq_id = 328, 439. FIX THIS AND I'LL REMOVE THIS
 
                                         connection.query({
                                             sql: 'SELECT eq_outs.eq_id, all_eq_name.eq_id, all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_id) AS all_eq_name  JOIN (SELECT eq_id, SUM(out_qty) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -390 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id ORDER BY all_eq_name.eq_name',
@@ -691,7 +691,7 @@ module.exports = function(io){
 
                                 } else if(AMorPM == 'PREPM'){
 
-                                    if(process == "bsgdep"){ // THIS IS FOR THE AMAZING DOUBLE ENTRY eq_id = 328, 439. FIX THIS AND I'LL REMOVE THIS
+                                    if(process == "BSGDEP"){ // THIS IS FOR THE AMAZING DOUBLE ENTRY eq_id = 328, 439. FIX THIS AND I'LL REMOVE THIS
 
                                         connection.query({
                                             sql: 'SELECT eq_outs.eq_id, all_eq_name.eq_id, all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_id) AS all_eq_name  JOIN (SELECT eq_id, SUM(out_qty) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -0 MINUTE)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id ORDER BY all_eq_name.eq_name',
@@ -718,7 +718,7 @@ module.exports = function(io){
 
                                 } else if(AMorPM == 'POSTPM'){
 
-                                    if(process == "bsgdep"){ // THIS IS FOR THE AMAZING DOUBLE ENTRY eq_id = 328, 439. FIX THIS AND I'LL REMOVE THIS
+                                    if(process == "BSGDEP"){ // THIS IS FOR THE AMAZING DOUBLE ENTRY eq_id = 328, 439. FIX THIS AND I'LL REMOVE THIS
 
                                         connection.query({
                                             sql: 'SELECT eq_outs.eq_id, all_eq_name.eq_id, all_eq_name.eq_name, coalesce(eq_outs.out_sum,0) as out_qty  FROM (SELECT B.eq_id, B.eq_name FROM MES_EQ_PROCESS A JOIN MES_EQ_INFO B ON A.eq_id = B.eq_id WHERE proc_id = ? GROUP BY B.eq_id) AS all_eq_name  JOIN (SELECT eq_id, SUM(out_qty) as out_sum FROM MES_OUT_DETAILS WHERE DATE(DATE_ADD(date_time, INTERVAL -1110 MINUTE)) = DATE(DATE_ADD(?, INTERVAL -1 DAY)) AND process_id = ? GROUP BY eq_id) AS eq_outs ON all_eq_name.eq_id = eq_outs.eq_id ORDER BY all_eq_name.eq_name',
@@ -951,10 +951,14 @@ module.exports = function(io){
                                             });
                                         }
                                         
+                                        //console.log(uph_per_tool_obj);
+                                        //console.log(outs_per_tool_obj);
+
                                         // ** compute oee ** //
                                         for(let i=0;i<uph_per_tool_obj.length; i++){ // question, what if tool doesn't have outs, toolname will not be reflected | answer: query result should have complete eq
 
                                             for(let j=0; j<outs_per_tool_obj.length; j++){
+
                                                 if(uph_per_tool_obj[i].tool_name == outs_per_tool_obj[j].tool_name){
                                                     
                                                     oee_value_per_tool_obj.push({
@@ -963,6 +967,7 @@ module.exports = function(io){
                                                         oee: ((outs_per_tool_obj[j].out_qty / uph_per_tool_obj[i].tool_uph / 12) * 100).toFixed(0)
 
                                                     });
+
                                                 }
                                             }
                                             
