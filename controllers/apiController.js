@@ -106,7 +106,10 @@ module.exports = function(app){
                     process_list_obj.push({
                         process: results[0].process
                     });
+
+                    res.render('realtime', {process : process_list_obj[0].process, process_list: full_process_list_obj});
                     
+                    /*
                     if(process_list_obj[0].process == 'POLY' || process_list_obj[0].process == 'NDEP' || process_list_obj[0].process == 'PDRIVE'  || process_list_obj[0].process == 'TEST'){
 
                         res.render('underconstruction');
@@ -116,7 +119,7 @@ module.exports = function(app){
                         res.render('realtime', {process : process_list_obj[0].process, process_list: full_process_list_obj});
 
                     }
-                    
+                    */
                   
 
                 });

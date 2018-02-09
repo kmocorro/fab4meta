@@ -536,7 +536,9 @@ module.exports = function(io){
                                             for(let i=0;i<scrap_results.length;i++){
                                                 scrap_details.push({
                                                     x: scrap_results[i].scrap_code,
-                                                    y: ((scrap_results[i].scrap_qty / (scrap_results[i].scrap_qty + outs_results[0].out_qty))*1000000).toFixed(0)
+                                                    //y: ((scrap_results[i].scrap_qty / (scrap_results[i].scrap_qty + outs_results[0].out_qty))*1000000).toFixed(0)
+                                                    // sups suggestion to make it qty instead of dppm
+                                                    y: scrap_results[i].scrap_qty
                                                 });
                                             }
 

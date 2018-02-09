@@ -203,7 +203,7 @@
                     <div class="nav-tabs-custom">
                         <!-- Tabs within a box -->
                         <ul class="nav nav-tabs pull-right">
-                            <li class="pull-left header"><i class="fa fa-bar-chart"></i> Scrap DPPM</li>
+                            <li class="pull-left header"><i class="fa fa-bar-chart"></i> Scrap</li>
                         </ul>
                         <div class="tab-content no-padding">
                             <div class="chart tab-pane active" id="scrap_chart" style=" height: 300px;"></div>
@@ -268,7 +268,22 @@
             /** Linearity Chart */
             var dataLinear = linear_traces;
             var layout = {
-                    title: ('<%= process %>').toUpperCase() + ' Linearity'
+                    title: ('<%= process %>').toUpperCase() + ' Linearity',
+                    xaxis: {
+                      title: 'fab hour',
+                      titlefont: {
+                        size: 10,
+                        color: 'lightgrey'
+                      },
+                    },
+                    yaxis: {
+                      title: 'quantity',
+                      titlefont: {
+                        size: 10,
+                        color: 'lightgrey'
+                      },
+                    }
+
                 };
 
             Plotly.newPlot('linearity-chart', dataLinear, layout, {displayModeBar: false})
@@ -299,6 +314,13 @@
                     t: 100,
                     pad: 4
                 },
+                xaxis: {
+                  title: 'percentage (%)',
+                  titlefont: {
+                        size: 10,
+                        color: 'lightgrey'
+                      },
+                }
             };
 
             Plotly.newPlot('yield-chart', dataYield, layout, {displayModeBar: false});
@@ -319,7 +341,7 @@
             /** scrap DPPM  chart */
             var dataScrap = scrap_objects;
             var layout = {
-                title: ('<%= process %>').toUpperCase() + ' | Top 5 Scrap (DPPM)',
+                title: ('<%= process %>').toUpperCase() + ' | Top 5 Scrap',
                     margin: {
                     l: 170,
                     r: 30,
@@ -327,6 +349,13 @@
                     t: 100,
                     pad: 4
                 },
+                xaxis: {
+                  title: 'quantity',
+                  titlefont: {
+                        size: 10,
+                        color: 'lightgrey'
+                      },
+                }
             }
             Plotly.newPlot('scrap_chart', dataScrap, layout, {displayModeBar: false});
             Plotly.update('scrap_chart', dataScrap, layout );
@@ -357,7 +386,11 @@
                 barmode: 'stack',
                 yaxis: {
                   title: 'percentage (%)',
-                  range: [0, 105.023]
+                  range: [0, 105.023],
+                  titlefont: {
+                        size: 10,
+                        color: 'lightgrey'
+                      },
                 }
             }
             Plotly.newPlot('oee-chart', dataLineOEE, layout, {displayModeBar: false});
